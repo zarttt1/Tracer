@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin - Kelola Ruangan</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #197b40;
+        --bg: #f8fafc;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg);
+        margin: 0;
+      }
+      header {
+        background: var(--primary);
+        padding: 1rem 8%;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .container {
+        padding: 3rem 8%;
+      }
+      .card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+      }
+      th {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 2px solid #eee;
+        color: #64748b;
+        font-size: 0.85rem;
+      }
+      td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #eee;
+      }
+      .badge {
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+      .active {
+        background: #dcfce7;
+        color: #15803d;
+      }
+      .btn-add {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h2>TRACER Admin</h2>
+      <nav>
+        <a
+          href="admin_dashboard.html"
+          style="color: white; text-decoration: none; margin-right: 20px"
+          >Dashboard</a
+        >
+        <a
+          href="admin_booking.html"
+          style="color: white; text-decoration: none; margin-right: 20px"
+          >Approval</a
+        >
+        <button
+          onclick="logout()"
+          style="
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+          "
+        >
+          Logout
+        </button>
+      </nav>
+    </header>
+
+    <div class="container">
+      <div class="card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h3>Daftar Ruangan Training Center</h3>
+          <button class="btn-add">+ Tambah Ruang</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama Ruangan</th>
+              <th>Kapasitas</th>
+              <th>Lokasi</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Ruang Excellence</b></td>
+              <td>25 Orang</td>
+              <td>Jakarta (Lantai 2)</td>
+              <td><span class="badge active">Aktif</span></td>
+              <td>
+                <button
+                  style="
+                    border: none;
+                    background: #f1f5f9;
+                    cursor: pointer;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                  "
+                >
+                  Edit
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td><b>Ruang Agile</b></td>
+              <td>20 Orang</td>
+              <td>Lampung</td>
+              <td><span class="badge active">Aktif</span></td>
+              <td>
+                <button
+                  style="
+                    border: none;
+                    background: #f1f5f9;
+                    cursor: pointer;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                  "
+                >
+                  Edit
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      function logout() {
+        localStorage.clear();
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

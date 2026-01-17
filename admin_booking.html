@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Approval Booking</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: #f5f7fa;
+      }
+
+      .navbar {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .logout-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .container {
+        display: flex;
+        gap: 30px;
+        padding: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .sidebar {
+        width: 200px;
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        height: fit-content;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      .sidebar-menu {
+        list-style: none;
+      }
+
+      .sidebar-menu li {
+        margin-bottom: 10px;
+      }
+
+      .sidebar-menu a {
+        display: block;
+        padding: 12px 15px;
+        color: #34495e;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        border-left: 3px solid transparent;
+      }
+
+      .sidebar-menu a.active {
+        background: #ecf0f1;
+        color: #2ecc71;
+        border-left-color: #2ecc71;
+      }
+
+      .content {
+        flex: 1;
+      }
+
+      .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        padding: 8px 16px;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s;
+        color: #7f8c8d;
+      }
+
+      .filter-btn.active {
+        background: #2ecc71;
+        color: white;
+        border-color: #2ecc71;
+      }
+
+      .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+
+      .card-header {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: white;
+        padding: 20px;
+      }
+
+      .card-header h3 {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        background: #ecf0f1;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        color: #34495e;
+      }
+
+      td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #ecf0f1;
+      }
+
+      tr:hover {
+        background: #f9f9f9;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .badge-pending {
+        background: #fef3e2;
+        color: #f39c12;
+      }
+
+      .badge-approved {
+        background: #d5f4e6;
+        color: #27ae60;
+      }
+
+      .badge-rejected {
+        background: #fadbd8;
+        color: #e74c3c;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-decoration: none;
+      }
+
+      .btn-sm {
+        padding: 6px 12px;
+        font-size: 11px;
+      }
+
+      .btn-info {
+        background: #3498db;
+        color: white;
+      }
+
+      .btn-info:hover {
+        background: #2980b9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar">
+      <h2>📚 Training Center - Admin Approval</h2>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+      <div class="sidebar">
+        <ul class="sidebar-menu">
+          <li><a href="admin-dashboard.html">📊 Dashboard</a></li>
+          <li>
+            <a href="admin-bookings.html" class="active">📋 Approval Booking</a>
+          </li>
+          <li><a href="admin-rooms.html">🏢 Kelola Ruangan</a></li>
+          <li><a href="admin-users.html">👥 Kelola User</a></li>
+        </ul>
+      </div>
+
+      <div class="content">
+        <div class="filter-tabs">
+          <button class="filter-btn active" onclick="filterBookings('all')">
+            Semua
+          </button>
+          <button class="filter-btn" onclick="filterBookings('pending')">
+            Pending
+          </button>
+          <button class="filter-btn" onclick="filterBookings('approved')">
+            Approved
+          </button>
+          <button class="filter-btn" onclick="filterBookings('rejected')">
+            Rejected
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>📋 Daftar Booking</h3>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Ruangan</th>
+                  <th>Tanggal</th>
+                  <th>Jam</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="bookingsTable">
+                <tr>
+                  <td>John Doe</td>
+                  <td>Ruang Komersial AKK</td>
+                  <td>18 Jan 2026</td>
+                  <td>10:00 - 12:00</td>
+                  <td><span class="badge badge-pending">Pending</span></td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-info"
+                      onclick="viewBookingDetail(1)"
+                    >
+                      Detail
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Jane Smith</td>
+                  <td>Ruang Excellence</td>
+                  <td>19 Jan 2026</td>
+                  <td>13:00 - 15:00</td>
+                  <td><span class="badge badge-pending">Pending</span></td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-info"
+                      onclick="viewBookingDetail(2)"
+                    >
+                      Detail
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Bob Johnson</td>
+                  <td>Ruang Agile</td>
+                  <td>20 Jan 2026</td>
+                  <td>09:00 - 11:00</td>
+                  <td><span class="badge badge-pending">Pending</span></td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-info"
+                      onclick="viewBookingDetail(3)"
+                    >
+                      Detail
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Alice Brown</td>
+                  <td>Ruang Teamwork</td>
+                  <td>21 Jan 2026</td>
+                  <td>14:00 - 16:00</td>
+                  <td><span class="badge badge-approved">Approved</span></td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-info"
+                      onclick="viewBookingDetail(4)"
+                    >
+                      Detail
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Charlie Davis</td>
+                  <td>Ruang Komersial AKK</td>
+                  <td>22 Jan 2026</td>
+                  <td>11:00 - 13:00</td>
+                  <td><span class="badge badge-rejected">Rejected</span></td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-info"
+                      onclick="viewBookingDetail(5)"
+                    >
+                      Detail
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function initPage() {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user || user.role !== "admin") {
+          window.location.href = "index.html";
+        }
+      }
+
+      function filterBookings(status) {
+        // Update filter buttons
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        event.target.classList.add("active");
+
+        // In real app, filter table rows
+        alert("Filter: " + status);
+      }
+
+      function viewBookingDetail(id) {
+        localStorage.setItem("adminBookingDetail", id);
+        window.location.href = "admin-booking-detail.html";
+      }
+
+      function logout() {
+        localStorage.removeItem("user");
+        window.location.href = "index.html";
+      }
+
+      initPage();
+    </script>
+  </body>
+</html>

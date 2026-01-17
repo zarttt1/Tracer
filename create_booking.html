@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Booking - Training Center</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      :root {
+        --primary-green: #197b40;
+        --light-green: #e8f5ed;
+        --dark-text: #1a2e22;
+        --gray-text: #64748b;
+        --border-color: #e2e8f0;
+      }
+
+      body {
+        background-color: #f8fafc;
+        color: var(--dark-text);
+      }
+
+      /* --- NAVBAR (Identik dengan Index.html) --- */
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 8%;
+        background-color: var(--primary-green);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+
+      .logo-text {
+        font-size: 22px;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: -0.5px;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+      }
+
+      .nav-item {
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        font-size: 14px;
+        transition: 0.2s ease-in-out;
+      }
+
+      .btn-admin {
+        background: #ffffff;
+        color: var(--primary-green) !important;
+        padding: 10px 24px;
+        border-radius: 50px;
+        font-weight: 700 !important;
+        text-decoration: none;
+        transition: 0.3s;
+      }
+
+      /* --- MAIN CONTENT --- */
+      .main-content {
+        padding: 50px 8%;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .page-header {
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .page-header h2 {
+        font-size: 28px;
+        font-weight: 800;
+      }
+
+      .card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
+      }
+
+      .card-body {
+        padding: 40px;
+      }
+
+      /* --- FORM GRID --- */
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--dark-text);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 15px;
+        background: #fcfcfd;
+        transition: 0.3s;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(25, 123, 64, 0.1);
+        background: white;
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 700;
+        background: var(--primary-green);
+        color: white;
+        box-shadow: 0 10px 25px rgba(25, 123, 64, 0.2);
+        transition: 0.3s;
+      }
+
+      .btn-submit:hover {
+        background: #146333;
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 768px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .full-width {
+          grid-column: span 1;
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="index.html" class="logo-container">
+        <span style="font-size: 24px">📚</span>
+        <span class="logo-text">Training Center</span>
+      </a>
+      <div class="nav-links">
+        <a href="jadwal.html" class="nav-item">Jadwal</a>
+        <a href="my_bookings.html" class="nav-item">My Booking</a>
+        <a href="login.html" class="btn-admin">Login Admin</a>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <div class="page-header">
+        <h2>Form Reservasi Ruangan</h2>
+        <p>Lengkapi detail kegiatan Anda di bawah ini.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <form id="bookingForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Nama Pemesan</label>
+                <input type="text" placeholder="Nama Lengkap" required />
+              </div>
+              <div class="form-group">
+                <label>Business Unit (BU)</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: HR, IT, Marketing"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Lokasi</label>
+                <select required>
+                  <option value="">-- Pilih Lokasi --</option>
+                  <option value="Lampung">Lampung</option>
+                  <option value="Jakarta">Jakarta</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Pilih Ruangan</label>
+                <select required>
+                  <option value="">-- Pilih Ruangan --</option>
+                  <option>Ruang Komersial AKK</option>
+                  <option>Ruang Excellence</option>
+                  <option>Ruang Agile</option>
+                  <option>Ruang Teamwork</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Tanggal Kegiatan</label>
+                <input type="date" id="date" required />
+              </div>
+              <div class="form-group">
+                <label>Waktu (Sesi)</label>
+                <select required>
+                  <option value="">-- Pilih Sesi --</option>
+                  <option value="Pagi">Pagi (08:00 - 12:00)</option>
+                  <option value="Siang">Siang (13:00 - 17:00)</option>
+                  <option value="Full Day">Pagi sampai Siang (Full Day)</option>
+                </select>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Purpose (Tujuan Kegiatan)</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Meeting Koordinasi Bulanan"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Roomset (Layout Ruangan)</label>
+                <select required>
+                  <option value="">-- Pilih Layout --</option>
+                  <option>U-Shape</option>
+                  <option>Classroom</option>
+                  <option>Theater</option>
+                  <option>Round Table</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Meals Option (Konsumsi)</label>
+                <select required>
+                  <option value="">-- Pilih Opsi --</option>
+                  <option>Tanpa Konsumsi</option>
+                  <option>Snack Pagi</option>
+                  <option>Makan Siang</option>
+                  <option>Snack & Makan Siang</option>
+                </select>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Catatan Tambahan</label>
+                <textarea
+                  placeholder="Tuliskan detail kebutuhan lainnya..."
+                ></textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+              Kirim Pengajuan Booking
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("date").min = today;
+
+      document
+        .getElementById("bookingForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          alert("Booking Anda sedang diproses!");
+          window.location.href = "my_bookings.html";
+        });
+    </script>
+  </body>
+</html>
