@@ -3,323 +3,448 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Booking Saya</title>
+    <title>Booking Saya - TRACER</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        --primary: #197b40;
+        --primary-dark: #125a2f;
+        --bg: #f8fafc;
+        --white: #ffffff;
+        --danger: #e74c3c;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        font-family: "Inter", sans-serif;
       }
-
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-        background: #f5f7fa;
+        background: var(--bg);
+        color: var(--text-main);
+        line-height: 1.5;
       }
 
-      .navbar {
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        padding: 15px 30px;
+      /* --- NAVBAR (Pertahankan dari index.html) --- */
+      nav {
+        background: var(--primary);
+        padding: 1rem 8%;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        color: white;
         position: sticky;
         top: 0;
         z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .logo {
+        text-decoration: none;
+        color: white;
+      }
+      .logo h1 {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+      }
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        opacity: 0.9;
+        transition: 0.3s;
+      }
+      .nav-links a:hover {
+        opacity: 1;
+      }
+      .nav-links a.active {
+        border-bottom: 2px solid white;
+        padding-bottom: 2px;
+        opacity: 1;
       }
 
       .logout-btn {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
+        background: rgba(255, 255, 255, 0.15);
         border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 8px 16px;
-        border-radius: 6px;
+        color: white;
+        padding: 6px 18px;
+        border-radius: 8px;
         cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
+      }
+      .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+      /* --- END NAVBAR --- */
+
+      .header-section {
+        background: var(--primary);
+        color: white;
+        padding: 3rem 8% 6rem;
       }
 
       .container {
-        display: flex;
-        gap: 30px;
-        padding: 30px;
+        padding: 0 8%;
         max-width: 1400px;
-        margin: 0 auto;
-      }
-
-      .sidebar {
-        width: 200px;
-        background: white;
-        border-radius: 8px;
-        padding: 20px;
-        height: fit-content;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      }
-
-      .sidebar-menu {
-        list-style: none;
-      }
-
-      .sidebar-menu li {
-        margin-bottom: 10px;
-      }
-
-      .sidebar-menu a {
-        display: block;
-        padding: 12px 15px;
-        color: #34495e;
-        text-decoration: none;
-        border-radius: 6px;
-        font-size: 14px;
-        border-left: 3px solid transparent;
-      }
-
-      .sidebar-menu a.active {
-        background: #ecf0f1;
-        color: #2ecc71;
-        border-left-color: #2ecc71;
-      }
-
-      .content {
-        flex: 1;
+        margin: -4rem auto 3rem;
       }
 
       .card {
         background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
       }
 
       .card-header {
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        color: white;
-        padding: 20px;
+        padding: 24px 30px;
+        border-bottom: 1px solid #f1f5f9;
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
         align-items: center;
       }
 
-      .card-header h3 {
-        font-size: 16px;
-        font-weight: 600;
-      }
-
-      .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
+      .search-input,
+      .date-input {
+        padding: 10px 15px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
         font-size: 14px;
-        font-weight: 500;
-        transition: all 0.3s;
+        outline: none;
+        transition: 0.2s;
+      }
+      .search-input:focus,
+      .date-input:focus {
+        border-color: var(--primary);
+      }
+
+      .search-input {
+        flex: 2;
+        min-width: 250px;
+      }
+      .date-input {
+        flex: 1;
+        min-width: 150px;
+      }
+
+      .btn-new {
+        background: var(--primary);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 10px;
         text-decoration: none;
-        display: inline-block;
+        font-weight: 700;
+        font-size: 14px;
+        transition: 0.3s;
+      }
+      .btn-new:hover {
+        background: var(--primary-dark);
       }
 
-      .btn-primary {
-        background: white;
-        color: #2c3e50;
+      .table-container {
+        overflow-x: auto;
+        padding: 10px;
       }
-
-      .card-body {
-        padding: 20px;
-      }
-
       table {
         width: 100%;
         border-collapse: collapse;
+        min-width: 900px;
       }
-
       th {
-        background: #ecf0f1;
-        padding: 12px;
         text-align: left;
-        font-weight: 600;
-        font-size: 13px;
-        color: #34495e;
+        padding: 16px;
+        background: #f8fafc;
+        color: var(--text-muted);
+        font-size: 12px;
+        text-transform: uppercase;
       }
-
       td {
-        padding: 15px 12px;
-        border-bottom: 1px solid #ecf0f1;
+        padding: 20px 16px;
+        border-bottom: 1px solid #f1f5f9;
       }
 
-      tr:hover {
-        background: #f9f9f9;
+      .room-name {
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 14px;
+        display: block;
+      }
+      .booking-time {
+        font-size: 12px;
+        color: var(--text-muted);
       }
 
       .badge {
-        display: inline-block;
         padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 800;
+      }
+      .status-approved {
+        background: #dcfce7;
+        color: #15803d;
+      }
+      .status-pending {
+        background: #fef9c3;
+        color: #a16207;
+      }
+      .status-rejected {
+        background: #fee2e2;
+        color: #b91c1c;
       }
 
-      .badge-pending {
-        background: #fef3e2;
-        color: #f39c12;
+      .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-muted);
+        display: none;
       }
 
-      .badge-approved {
-        background: #d5f4e6;
-        color: #27ae60;
+      .btn-cancel {
+        color: var(--danger);
+        background: #fff1f0;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
       }
-
-      .badge-rejected {
-        background: #fadbd8;
-        color: #e74c3c;
-      }
-
-      .btn-sm {
-        padding: 6px 12px;
-        font-size: 12px;
-      }
-
-      .btn-info {
-        background: #3498db;
+      .btn-cancel:hover {
+        background: var(--danger);
         color: white;
-      }
-
-      .btn-danger {
-        background: #e74c3c;
-        color: white;
-      }
-
-      .btn-info:hover {
-        background: #2980b9;
-      }
-
-      .btn-danger:hover {
-        background: #c0392b;
       }
     </style>
   </head>
   <body>
-    <div class="navbar">
-      <h2>📚 Training Center - Booking Saya</h2>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+    <nav>
+      <a href="index.html" class="logo"><h1>TRACER</h1></a>
+      <div class="nav-links">
+        <a href="jadwal.html">Jadwal</a>
+        <a href="my_bookings.html">My Booking</a>
+        <a href="login_admin.html" class="btn-login-admin">Login Admin</a>
+      </div>
+    </nav>
+
+    <div class="header-section">
+      <h1>Riwayat Reservasi Saya</h1>
+      <p style="opacity: 0.8; margin-top: 8px">
+        Lacak status pengajuan dan instruksi admin di satu tempat.
+      </p>
     </div>
 
     <div class="container">
-      <div class="sidebar">
-        <ul class="sidebar-menu">
-          <li><a href="user_dashboard.html">📊 Dashboard</a></li>
-          <li><a href="create_booking.html">➕ Booking Ruangan</a></li>
-          <li><a href="my_bookings.html" class="active">📝 Booking Saya</a></li>
-        </ul>
-      </div>
-
-      <div class="content">
-        <div class="card">
-          <div class="card-header">
-            <h3>📝 Daftar Booking Saya</h3>
-            <a href="create_booking.html" class="btn btn-primary"
-              >Booking Baru</a
-            >
+      <main class="card">
+        <div class="card-header">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 15px;
+            "
+          >
+            <h3 style="font-size: 18px; color: var(--text-main)">
+              Daftar Booking
+            </h3>
+            <a href="create_booking.html" class="btn-new">+ Booking Baru</a>
           </div>
-          <div class="card-body">
-            <table>
-              <thead>
-                <tr>
-                  <th>Tanggal</th>
-                  <th>Ruangan</th>
-                  <th>Jam</th>
-                  <th>Status</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>15 Jan 2026</td>
-                  <td>Ruang Komersial AKK</td>
-                  <td>09:00 - 11:00</td>
-                  <td><span class="badge badge-approved">Approved</span></td>
-                  <td>
-                    <button class="btn btn-sm btn-info" onclick="viewDetail(1)">
-                      Detail
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>16 Jan 2026</td>
-                  <td>Ruang Excellence</td>
-                  <td>13:00 - 15:00</td>
-                  <td><span class="badge badge-pending">Pending</span></td>
-                  <td>
-                    <button class="btn btn-sm btn-info" onclick="viewDetail(2)">
-                      Detail
-                    </button>
-                    <button
-                      class="btn btn-sm btn-danger"
-                      onclick="cancelBooking(2)"
-                    >
-                      Batalkan
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>17 Jan 2026</td>
-                  <td>Ruang Agile</td>
-                  <td>10:00 - 12:00</td>
-                  <td><span class="badge badge-pending">Pending</span></td>
-                  <td>
-                    <button class="btn btn-sm btn-info" onclick="viewDetail(3)">
-                      Detail
-                    </button>
-                    <button
-                      class="btn btn-sm btn-danger"
-                      onclick="cancelBooking(3)"
-                    >
-                      Batalkan
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>12 Jan 2026</td>
-                  <td>Ruang Teamwork</td>
-                  <td>14:00 - 16:00</td>
-                  <td><span class="badge badge-rejected">Rejected</span></td>
-                  <td>
-                    <button class="btn btn-sm btn-info" onclick="viewDetail(4)">
-                      Detail
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+          <div class="filter-group">
+            <input
+              type="text"
+              id="textSearch"
+              class="search-input"
+              placeholder="Cari Nama Pemohon atau Ruangan..."
+              onkeyup="applyFilters()"
+            />
+            <div style="display: flex; align-items: center; gap: 10px">
+              <label
+                style="
+                  font-size: 12px;
+                  font-weight: 600;
+                  color: var(--text-muted);
+                "
+                >TANGGAL:</label
+              >
+              <input
+                type="date"
+                id="dateFilter"
+                class="date-input"
+                onchange="applyFilters()"
+              />
+            </div>
+            <button
+              onclick="resetFilters()"
+              style="
+                background: none;
+                border: none;
+                color: var(--text-muted);
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: underline;
+              "
+            >
+              Reset
+            </button>
           </div>
         </div>
-      </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Ruangan & Waktu</th>
+                <th>Pemohon</th>
+                <th>Status</th>
+                <th>Catatan Admin</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="booking-list"></tbody>
+          </table>
+          <div id="emptyState" class="empty-state">
+            Tidak ada data yang cocok dengan pencarian Anda.
+          </div>
+        </div>
+      </main>
     </div>
 
     <script>
-      function initPage() {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!user || user.role !== "user") {
+      // Data Mock
+      const myBookings = [
+        {
+          id: 101,
+          room: "Ruang Excellence",
+          date: "2026-01-15",
+          dateDisplay: "15 Jan 2026",
+          time: "09:00 - 11:00",
+          requester: "Budi Santoso",
+          status: "approved",
+          note: "Silahkan ambil kunci di lobby.",
+        },
+        {
+          id: 102,
+          room: "Ruang Agile",
+          date: "2026-01-18",
+          dateDisplay: "18 Jan 2026",
+          time: "13:00 - 15:00",
+          requester: "Siti Aminah",
+          status: "pending",
+          note: "Menunggu konfirmasi Manager Training.",
+        },
+        {
+          id: 103,
+          room: "Ruang Teamwork",
+          date: "2026-01-20",
+          dateDisplay: "20 Jan 2026",
+          time: "10:00 - 12:00",
+          requester: "Budi Santoso",
+          status: "rejected",
+          note: "Ruangan sudah dibooking untuk agenda Direksi.",
+        },
+      ];
+
+      function renderTable(data) {
+        const tableBody = document.getElementById("booking-list");
+        const emptyState = document.getElementById("emptyState");
+
+        if (data.length === 0) {
+          tableBody.innerHTML = "";
+          emptyState.style.display = "block";
+          return;
+        }
+
+        emptyState.style.display = "none";
+        tableBody.innerHTML = data
+          .map(
+            (item) => `
+          <tr>
+            <td>
+              <span class="room-name">${item.room}</span>
+              <span class="booking-time">${item.dateDisplay} | ${
+              item.time
+            }</span>
+            </td>
+            <td><span style="font-weight:600">${item.requester}</span></td>
+            <td><span class="badge status-${
+              item.status
+            }">${item.status.toUpperCase()}</span></td>
+            <td><p style="font-style:italic; font-size:13px; color:#64748b">${
+              item.note
+            }</p></td>
+            <td>
+              ${
+                item.status === "pending"
+                  ? `<button class="btn-cancel" onclick="cancelBooking(${item.id})">Batalkan</button>`
+                  : "-"
+              }
+            </td>
+          </tr>
+        `
+          )
+          .join("");
+      }
+
+      function applyFilters() {
+        const textKeyword = document
+          .getElementById("textSearch")
+          .value.toLowerCase();
+        const dateKeyword = document.getElementById("dateFilter").value;
+
+        const filtered = myBookings.filter((item) => {
+          const matchText =
+            item.room.toLowerCase().includes(textKeyword) ||
+            item.requester.toLowerCase().includes(textKeyword);
+          const matchDate = dateKeyword === "" || item.date === dateKeyword;
+          return matchText && matchDate;
+        });
+
+        renderTable(filtered);
+      }
+
+      function resetFilters() {
+        document.getElementById("textSearch").value = "";
+        document.getElementById("dateFilter").value = "";
+        renderTable(myBookings);
+      }
+
+      function handleLogout() {
+        if (confirm("Yakin ingin keluar?")) {
+          localStorage.removeItem("user");
           window.location.href = "index.html";
         }
       }
 
-      function viewDetail(id) {
-        localStorage.setItem("selectedBooking", id);
-        window.location.href = "booking_detail.html";
-      }
-
       function cancelBooking(id) {
-        if (confirm("Yakin ingin membatalkan booking?")) {
-          alert("Booking dibatalkan!");
-          location.reload();
+        if (confirm("Apakah Anda yakin ingin membatalkan pengajuan ini?")) {
+          alert("Booking " + id + " telah berhasil dibatalkan.");
         }
       }
 
-      function logout() {
-        localStorage.removeItem("user");
-        window.location.href = "index.html";
-      }
-
-      initPage();
+      window.onload = () => renderTable(myBookings);
     </script>
   </body>
 </html>

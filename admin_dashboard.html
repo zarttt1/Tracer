@@ -3,23 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard - TRACER</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        --primary: #27ae60;
+        --primary-dark: #1e8449;
+        --bg: #f5f7fa;
+        --text-main: #2c3e50;
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        font-family: "Inter", sans-serif;
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-        background: #f5f7fa;
+        background: var(--bg);
+        color: var(--text-main);
       }
 
+      /* --- NAVBAR UPDATED (NAVIGASI DI ATAS) --- */
       .navbar {
         background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        padding: 15px 30px;
+        padding: 0 8%;
+        height: 70px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -30,402 +43,270 @@
         z-index: 100;
       }
 
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 40px;
+      }
+
       .navbar h2 {
-        font-size: 22px;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+
+      .nav-menu {
+        display: flex;
+        list-style: none;
+        gap: 20px;
+      }
+
+      .nav-menu a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        font-size: 14px;
         font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: 0.3s;
+      }
+
+      .nav-menu a:hover,
+      .nav-menu a.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.2);
       }
 
       .navbar-user {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 15px;
       }
 
       .logout-btn {
-        background: rgba(255, 255, 255, 0.2);
+        background: #e74c3c;
         color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: none;
         padding: 8px 16px;
         border-radius: 6px;
         cursor: pointer;
-        transition: all 0.3s;
+        font-weight: 600;
+        font-size: 13px;
+        transition: 0.3s;
       }
 
       .logout-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: #c0392b;
       }
 
+      /* --- CONTENT AREA --- */
       .container {
-        display: flex;
-        gap: 30px;
-        padding: 30px;
+        padding: 40px 8%;
         max-width: 1400px;
         margin: 0 auto;
       }
 
-      .sidebar {
-        width: 200px;
-        background: white;
-        border-radius: 8px;
-        padding: 20px;
-        height: fit-content;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      }
-
-      .sidebar-menu {
-        list-style: none;
-      }
-
-      .sidebar-menu li {
-        margin-bottom: 10px;
-      }
-
-      .sidebar-menu a {
-        display: block;
-        padding: 12px 15px;
-        color: #34495e;
-        text-decoration: none;
-        border-radius: 6px;
-        transition: all 0.3s;
-        font-size: 14px;
-        border-left: 3px solid transparent;
-      }
-
-      .sidebar-menu a:hover,
-      .sidebar-menu a.active {
-        background: #ecf0f1;
-        color: #2ecc71;
-        border-left-color: #2ecc71;
-      }
-
-      .content {
-        flex: 1;
-      }
-
       .stats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
       }
 
       .stat-card {
         background: white;
-        padding: 25px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        text-align: center;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
 
       .stat-card h3 {
         color: #7f8c8d;
-        font-size: 13px;
-        margin-bottom: 15px;
+        font-size: 12px;
         text-transform: uppercase;
+        margin-bottom: 10px;
+        letter-spacing: 1px;
       }
 
       .stat-number {
-        font-size: 36px;
-        font-weight: 700;
-        margin-bottom: 10px;
+        font-size: 42px;
+        font-weight: 800;
       }
 
-      .stat-card.pending .stat-number {
+      .pending .stat-number {
         color: #f39c12;
       }
-
-      .stat-card.approved .stat-number {
+      .approved .stat-number {
         color: #27ae60;
       }
-
-      .stat-card.rooms .stat-number {
+      .rooms .stat-number {
         color: #3498db;
       }
 
       .card {
         background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         overflow: hidden;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
       }
 
       .card-header {
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        color: white;
-        padding: 20px;
-      }
-
-      .card-header h3 {
-        font-size: 16px;
-        font-weight: 600;
+        background: #f8f9fa;
+        padding: 20px 25px;
+        border-bottom: 1px solid #edf2f7;
+        font-weight: 700;
+        color: var(--text-main);
       }
 
       .card-body {
-        padding: 20px;
+        padding: 25px;
       }
 
+      /* --- TABLES --- */
       table {
         width: 100%;
         border-collapse: collapse;
       }
 
       th {
-        background: #ecf0f1;
-        padding: 12px;
         text-align: left;
-        font-weight: 600;
-        font-size: 13px;
-        color: #34495e;
+        padding: 12px;
+        background: #f8f9fa;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #94a3b8;
       }
 
       td {
         padding: 15px 12px;
-        border-bottom: 1px solid #ecf0f1;
-      }
-
-      tr:hover {
-        background: #f9f9f9;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
       }
 
       .badge {
-        display: inline-block;
-        padding: 6px 12px;
+        padding: 5px 12px;
         border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-      }
-
-      .badge-pending {
-        background: #fef3e2;
-        color: #f39c12;
+        font-size: 11px;
+        font-weight: 700;
       }
 
       .badge-approved {
-        background: #d5f4e6;
-        color: #27ae60;
+        background: #dcfce7;
+        color: #15803d;
       }
-
-      .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 600;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-block;
-      }
-
-      .btn-sm {
-        padding: 6px 12px;
-        font-size: 11px;
+      .badge-pending {
+        background: #fef9c3;
+        color: #a16207;
       }
 
       .btn-info {
-        background: #3498db;
-        color: white;
+        background: var(--bg);
+        color: var(--text-main);
+        padding: 6px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid #e2e8f0;
       }
 
       .btn-info:hover {
-        background: #2980b9;
+        background: #e2e8f0;
       }
 
       .session-tabs {
         display: flex;
         gap: 10px;
         margin-bottom: 20px;
-        border-bottom: 2px solid #ecf0f1;
       }
 
       .session-tab {
-        padding: 12px 20px;
-        background: none;
+        padding: 10px 20px;
         border: none;
+        background: transparent;
         cursor: pointer;
-        font-size: 14px;
         font-weight: 600;
-        color: #7f8c8d;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s;
+        color: #94a3b8;
+        border-bottom: 2px solid transparent;
       }
 
       .session-tab.active {
-        color: #2ecc71;
-        border-bottom-color: #2ecc71;
+        color: var(--primary);
+        border-bottom-color: var(--primary);
       }
     </style>
   </head>
   <body>
     <div class="navbar">
-      <h2>📚 Training Center - Admin</h2>
+      <div class="nav-left">
+        <h2>TRACER ADMIN</h2>
+        <ul class="nav-menu">
+          <li><a href="admin_dashboard.html" class="active">Dashboard</a></li>
+          <li><a href="admin_booking.html">Approval</a></li>
+          <li><a href="admin_room.html">Fasilitas</a></li>
+        </ul>
+      </div>
       <div class="navbar-user">
-        <span id="adminName">Welcome, Admin</span>
+        <span id="adminName" style="font-size: 14px; font-weight: 600"
+          >Admin Mode</span
+        >
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
 
     <div class="container">
-      <div class="sidebar">
-        <ul class="sidebar-menu">
-          <li>
-            <a href="admin-dashboard.html" class="active">📊 Dashboard</a>
-          </li>
-          <li><a href="admin-bookings.html">📋 Approval Booking</a></li>
-          <li><a href="admin-rooms.html">🏢 Kelola Ruangan</a></li>
-          <li><a href="admin-users.html">👥 Kelola User</a></li>
-        </ul>
+      <div class="stats">
+        <div class="stat-card pending">
+          <h3>Menunggu Approval</h3>
+          <div class="stat-number">5</div>
+        </div>
+        <div class="stat-card approved">
+          <h3>Total Disetujui</h3>
+          <div class="stat-number">48</div>
+        </div>
+        <div class="stat-card rooms">
+          <h3>Total Ruangan</h3>
+          <div class="stat-number">8</div>
+        </div>
       </div>
 
-      <div class="content">
-        <div class="stats">
-          <div class="stat-card pending">
-            <h3>Menunggu Approval</h3>
-            <div class="stat-number">5</div>
+      <div class="card">
+        <div class="card-header">Sesi Berjalan Hari Ini</div>
+        <div class="card-body">
+          <div class="session-tabs">
+            <button class="session-tab active" onclick="showSession('today')">
+              Hari Ini (17 Jan)
+            </button>
+            <button class="session-tab" onclick="showSession('tomorrow')">
+              Besok (18 Jan)
+            </button>
           </div>
-          <div class="stat-card approved">
-            <h3>Total Disetujui</h3>
-            <div class="stat-number">48</div>
-          </div>
-          <div class="stat-card rooms">
-            <h3>Total Ruangan</h3>
-            <div class="stat-number">8</div>
-          </div>
-        </div>
 
-        <div class="card">
-          <div class="card-header">
-            <h3>📅 Daily Sessions</h3>
-          </div>
-          <div class="card-body">
-            <div class="session-tabs">
-              <button class="session-tab active" onclick="showSession('today')">
-                Today (15 Jan)
-              </button>
-              <button class="session-tab" onclick="showSession('tomorrow')">
-                Tomorrow (16 Jan)
-              </button>
-            </div>
-
-            <div id="todaySession">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Waktu</th>
-                    <th>User</th>
-                    <th>Ruangan</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>09:00 - 11:00</td>
-                    <td>John Doe</td>
-                    <td>Ruang Komersial AKK</td>
-                    <td><span class="badge badge-approved">Approved</span></td>
-                    <td><button class="btn btn-sm btn-info">Detail</button></td>
-                  </tr>
-                  <tr>
-                    <td>13:00 - 15:00</td>
-                    <td>Jane Smith</td>
-                    <td>Ruang Excellence</td>
-                    <td><span class="badge badge-approved">Approved</span></td>
-                    <td><button class="btn btn-sm btn-info">Detail</button></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div id="tomorrowSession" style="display: none">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Waktu</th>
-                    <th>User</th>
-                    <th>Ruangan</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>10:00 - 12:00</td>
-                    <td>Bob Johnson</td>
-                    <td>Ruang Agile</td>
-                    <td><span class="badge badge-approved">Approved</span></td>
-                    <td><button class="btn btn-sm btn-info">Detail</button></td>
-                  </tr>
-                  <tr>
-                    <td>14:00 - 16:00</td>
-                    <td>Alice Brown</td>
-                    <td>Ruang Teamwork</td>
-                    <td><span class="badge badge-approved">Approved</span></td>
-                    <td><button class="btn btn-sm btn-info">Detail</button></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>📋 Booking Menunggu Approval</h3>
-          </div>
-          <div class="card-body">
+          <div id="todaySession">
             <table>
               <thead>
                 <tr>
+                  <th>Waktu</th>
                   <th>User</th>
                   <th>Ruangan</th>
-                  <th>Tanggal</th>
-                  <th>Jam</th>
+                  <th>Status</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>John Doe</td>
-                  <td>Ruang Komersial AKK</td>
-                  <td>18 Jan 2026</td>
-                  <td>10:00 - 12:00</td>
-                  <td>
-                    <button
-                      class="btn btn-sm btn-info"
-                      onclick="goToBookingDetail(1)"
-                    >
-                      Detail
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Jane Smith</td>
-                  <td>Ruang Excellence</td>
-                  <td>19 Jan 2026</td>
-                  <td>13:00 - 15:00</td>
-                  <td>
-                    <button
-                      class="btn btn-sm btn-info"
-                      onclick="goToBookingDetail(2)"
-                    >
-                      Detail
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Bob Johnson</td>
-                  <td>Ruang Agile</td>
-                  <td>20 Jan 2026</td>
                   <td>09:00 - 11:00</td>
+                  <td>Budi Santoso</td>
+                  <td>Ruang Komersial AKK</td>
+                  <td><span class="badge badge-approved">Approved</span></td>
                   <td>
-                    <button
-                      class="btn btn-sm btn-info"
-                      onclick="goToBookingDetail(3)"
+                    <a href="admin_booking_detail.html" class="btn-info"
+                      >Detail</a
                     >
-                      Detail
-                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -433,34 +314,60 @@
           </div>
         </div>
       </div>
+
+      <div class="card">
+        <div class="card-header">Antrean Approval Terbaru</div>
+        <div class="card-body">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Ruangan</th>
+                <th>Tanggal</th>
+                <th>Jam</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>John Doe</td>
+                <td>Ruang Excellence</td>
+                <td>18 Jan 2026</td>
+                <td>10:00 - 12:00</td>
+                <td>
+                  <button class="btn-info" onclick="goToBookingDetail(1)">
+                    Periksa
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <script>
       function initPage() {
         const user = JSON.parse(localStorage.getItem("user"));
-        if (!user || user.role !== "admin") {
-          window.location.href = "index.html";
-        }
-        document.getElementById(
-          "adminName"
-        ).textContent = `Welcome, ${user.name}`;
+        // Jika sedang testing prototype, baris di bawah bisa di-comment agar tidak kena redirect
+        // if (!user || user.role !== "admin") window.location.href = "index.html";
+        if (user)
+          document.getElementById(
+            "adminName"
+          ).textContent = `Halo, ${user.name}`;
       }
 
       function showSession(session) {
-        document.getElementById("todaySession").style.display =
-          session === "today" ? "block" : "none";
-        document.getElementById("tomorrowSession").style.display =
-          session === "tomorrow" ? "block" : "none";
-
-        document.querySelectorAll(".session-tab").forEach((tab) => {
-          tab.classList.remove("active");
-        });
+        // Logika sederhana ganti tab
+        const tabs = document.querySelectorAll(".session-tab");
+        tabs.forEach((t) => t.classList.remove("active"));
         event.target.classList.add("active");
+        alert("Menampilkan data untuk: " + session);
       }
 
       function goToBookingDetail(id) {
         localStorage.setItem("adminBookingDetail", id);
-        window.location.href = "admin-booking-detail.html";
+        window.location.href = "admin_booking_detail.html";
       }
 
       function logout() {
@@ -468,7 +375,7 @@
         window.location.href = "index.html";
       }
 
-      initPage();
+      window.onload = initPage;
     </script>
   </body>
 </html>

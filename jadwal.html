@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jadwal Reservasi - TRACER</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #197b40;
+        --primary-dark: #125a2f;
+        --bg: #f8fafc;
+        --white: #ffffff;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: #1e293b;
+      }
+
+      /* --- NAVBAR (Pertahankan Versi Lengkap) --- */
+      nav {
+        background: var(--primary);
+        padding: 1rem 8%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .logo {
+        cursor: pointer;
+        text-decoration: none;
+        color: white;
+      }
+      .logo h1 {
+        font-size: 22px;
+        font-weight: 800;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .btn-login-admin {
+        background: white;
+        color: var(--primary) !important;
+        padding: 8px 15px;
+        border-radius: 8px;
+        transition: 0.3s;
+      }
+      .btn-login-admin:hover {
+        background: #f1f1f1;
+      }
+
+      /* --- HEADER & CONTENT --- */
+      .header-section {
+        background: var(--primary);
+        color: white;
+        padding: 3rem 8% 5rem 8%;
+      }
+      .container {
+        padding: 0 8%;
+        max-width: 1400px;
+        margin: -3rem auto 3rem auto;
+      }
+      .card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      }
+
+      /* --- SEARCH --- */
+      .search-bar {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+      }
+      .search-bar input {
+        padding: 10px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 350px;
+        outline: none;
+      }
+
+      /* --- TABLE --- */
+      .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+      }
+      th {
+        padding: 15px;
+        background: #f1f5f9;
+        font-size: 13px;
+        text-transform: uppercase;
+        color: #64748b;
+      }
+      td {
+        padding: 18px 15px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 14px;
+      }
+      .room-name {
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .approved {
+        background: #dcfce7;
+        color: #15803d;
+      }
+      .pending {
+        background: #fef9c3;
+        color: #a16207;
+      }
+
+      .btn-detail {
+        background: #f1f5f9;
+        color: #1e293b;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        transition: 0.3s;
+        border: none;
+        cursor: pointer;
+      }
+      .btn-detail:hover {
+        background: var(--primary);
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="index.html" class="logo"><h1>TRACER</h1></a>
+      <div class="nav-links">
+        <a href="jadwal.html">Jadwal</a>
+        <a href="my_bookings.html">My Booking</a>
+        <a href="login_admin.html" class="btn-login-admin">Login Admin</a>
+      </div>
+    </nav>
+
+    <div class="header-section">
+      <h1>Jadwal Penggunaan Ruangan</h1>
+      <p style="opacity: 0.8; margin-top: 5px">
+        Daftar reservasi yang telah terdaftar di sistem.
+      </p>
+    </div>
+
+    <div class="container">
+      <div class="card">
+        <div class="search-bar">
+          <input
+            type="text"
+            placeholder="Cari ruangan atau kegiatan..."
+            id="searchInput"
+            onkeyup="filterTable()"
+          />
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Waktu</th>
+                <th>Ruangan</th>
+                <th>Kegiatan</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="bookingTable">
+              <tr>
+                <td>15 Jan 2026</td>
+                <td>09:00 - 11:00</td>
+                <td class="room-name">Ruang Komersial AKK</td>
+                <td>Training AKK</td>
+                <td><span class="badge approved">Approved</span></td>
+                <td>
+                  <button class="btn-detail" onclick="viewDetail(1)">
+                    Detail
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>16 Jan 2026</td>
+                <td>13:00 - 15:00</td>
+                <td class="room-name">Ruang Excellence</td>
+                <td>Workshop Excellence</td>
+                <td><span class="badge pending">Pending</span></td>
+                <td>
+                  <button class="btn-detail" onclick="viewDetail(2)">
+                    Detail
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>17 Jan 2026</td>
+                <td>10:00 - 12:00</td>
+                <td class="room-name">Ruang Agile</td>
+                <td>Agile Sprint Planning</td>
+                <td><span class="badge pending">Pending</span></td>
+                <td>
+                  <button class="btn-detail" onclick="viewDetail(3)">
+                    Detail
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Fungsi kirim data ke booking_detail.html
+      function viewDetail(id) {
+        localStorage.setItem("selectedBooking", id);
+        window.location.href = "booking_detail.html";
+      }
+
+      // Fungsi pencarian
+      function filterTable() {
+        let filter = document.getElementById("searchInput").value.toUpperCase();
+        let rows = document
+          .getElementById("bookingTable")
+          .getElementsByTagName("tr");
+        for (let i = 0; i < rows.length; i++) {
+          let text = rows[i].innerText.toUpperCase();
+          rows[i].style.display = text.indexOf(filter) > -1 ? "" : "none";
+        }
+      }
+    </script>
+  </body>
+</html>

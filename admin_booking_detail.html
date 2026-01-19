@@ -3,375 +3,326 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin - Detail Booking</title>
+    <title>Admin - Detail Booking | TRACER</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        --primary: #27ae60;
+        --bg: #f5f7fa;
+        --text-main: #2c3e50;
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        font-family: "Inter", sans-serif;
       }
-
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-        background: #f5f7fa;
+        background: var(--bg);
+        color: var(--text-main);
       }
 
+      /* --- NAVBAR --- */
       .navbar {
         background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        padding: 15px 30px;
-        color: white;
+        padding: 0 8%;
+        height: 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .navbar h2 {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: 1px;
       }
 
       .container {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 40px auto;
         padding: 0 20px;
       }
 
+      /* --- CARD STYLE --- */
       .card {
         background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         overflow: hidden;
-        margin-bottom: 20px;
+        border: 1px solid #edf2f7;
       }
 
       .card-header {
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        color: white;
-        padding: 20px;
+        background: #fff;
+        padding: 25px 30px;
+        border-bottom: 2px solid #f8fafc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
 
       .card-header h2 {
-        font-size: 20px;
-        font-weight: 600;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primary);
       }
 
       .card-body {
-        padding: 30px;
+        padding: 35px 40px;
       }
 
-      .detail-row {
+      /* --- DETAIL GRID --- */
+      .info-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 30px;
+        gap: 40px;
         margin-bottom: 30px;
       }
 
-      .detail-item h3 {
-        color: #7f8c8d;
-        font-size: 12px;
+      .info-group h3 {
+        color: #94a3b8;
+        font-size: 11px;
         text-transform: uppercase;
-        margin-bottom: 8px;
-        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        font-weight: 700;
       }
 
-      .detail-item p {
-        color: #2c3e50;
-        font-size: 16px;
-        font-weight: 500;
+      .info-group p {
+        color: var(--text-main);
+        font-size: 15px;
+        font-weight: 600;
       }
 
       .divider {
-        border-top: 1px solid #ecf0f1;
+        height: 1px;
+        background: #f1f5f9;
         margin: 30px 0;
       }
 
-      .notes-section h3 {
-        color: #2c3e50;
-        margin-bottom: 15px;
-        font-size: 16px;
-      }
-
-      .notes-content {
-        background: #ecf0f1;
-        padding: 15px;
-        border-radius: 6px;
-        color: #34495e;
-        line-height: 1.6;
-      }
-
-      .badge {
-        display: inline-block;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 600;
-      }
-
-      .badge-pending {
-        background: #fef3e2;
-        color: #f39c12;
-      }
-
-      .badge-approved {
-        background: #d5f4e6;
-        color: #27ae60;
-      }
-
-      .badge-rejected {
-        background: #fadbd8;
-        color: #e74c3c;
-      }
-
-      .approval-section {
-        background: #ecf0f1;
+      /* --- NOTES SECTION --- */
+      .notes-box {
+        background: #f8fafc;
+        border-left: 4px solid var(--primary);
         padding: 20px;
         border-radius: 8px;
-        margin-top: 20px;
+        margin-top: 10px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #475569;
       }
 
-      .approval-section h3 {
-        color: #2c3e50;
-        margin-bottom: 15px;
+      /* --- APPROVAL ACTION --- */
+      .approval-panel {
+        background: #f1f5f9;
+        padding: 30px;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .approval-panel h3 {
         font-size: 14px;
-        font-weight: 600;
+        margin-bottom: 15px;
+        font-weight: 700;
       }
 
       textarea {
         width: 100%;
-        padding: 12px;
-        border: 1px solid #e0e0e0;
-        border-radius: 6px;
-        font-family: inherit;
-        font-size: 13px;
+        padding: 15px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 14px;
         resize: vertical;
-        min-height: 80px;
+        min-height: 100px;
+        margin-bottom: 20px;
+        outline: none;
+        transition: 0.3s;
+      }
+      textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
       }
 
-      .button-group {
+      .btn-group {
         display: flex;
         gap: 15px;
-        margin-top: 30px;
       }
 
       .btn {
-        padding: 12px 30px;
+        padding: 12px 25px;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 14px;
-        font-weight: 600;
-        transition: all 0.3s;
+        font-weight: 700;
+        transition: 0.3s;
         text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      .btn-success {
-        background: #27ae60;
+      .btn-approve {
+        background: var(--primary);
         color: white;
+        flex: 2;
+      }
+      .btn-approve:hover {
+        background: #1e8449;
+        transform: translateY(-2px);
       }
 
-      .btn-success:hover {
-        background: #229954;
+      .btn-reject {
+        background: #fee2e2;
+        color: #991b1b;
+        flex: 1;
+      }
+      .btn-reject:hover {
+        background: #fecaca;
       }
 
-      .btn-danger {
-        background: #e74c3c;
-        color: white;
+      .btn-back {
+        background: #e2e8f0;
+        color: #475569;
+        padding: 12px 20px;
+      }
+      .btn-back:hover {
+        background: #cbd5e1;
       }
 
-      .btn-danger:hover {
-        background: #c0392b;
+      .badge {
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .badge-pending {
+        background: #fef9c3;
+        color: #a16207;
       }
 
-      .btn-secondary {
-        background: #95a5a6;
-        color: white;
-      }
-
-      .btn-secondary:hover {
-        background: #7f8c8d;
+      @media (max-width: 768px) {
+        .info-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
       }
     </style>
   </head>
   <body>
     <div class="navbar">
-      <h2>📚 Training Center - Detail Booking</h2>
+      <h2>TRACER ADMIN</h2>
     </div>
 
     <div class="container">
       <div class="card">
         <div class="card-header">
-          <h2>Detail Booking untuk Approval</h2>
+          <h2>Detail Pengajuan Reservasi</h2>
+          <span class="badge badge-pending" id="statusBadge"
+            >PENDING REVIEW</span
+          >
         </div>
+
         <div class="card-body">
-          <div class="detail-row">
-            <div>
-              <div class="detail-item">
-                <h3>User</h3>
-                <p id="userName">John Doe</p>
-              </div>
-              <div class="detail-item" style="margin-top: 20px">
-                <h3>Email</h3>
-                <p id="userEmail">user@example.com</p>
-              </div>
-              <div class="detail-item" style="margin-top: 20px">
-                <h3>Telepon</h3>
-                <p id="phone">+62-812-345-6789</p>
-              </div>
+          <div class="info-grid">
+            <div class="info-group">
+              <h3>Identitas Pemohon</h3>
+              <p id="userName">John Doe</p>
+              <small style="color: #64748b" id="userEmail"
+                >john@company.com</small
+              >
             </div>
-            <div>
-              <div class="detail-item">
-                <h3>Ruangan</h3>
-                <p id="roomName">Ruang Komersial AKK</p>
-              </div>
-              <div class="detail-item" style="margin-top: 20px">
-                <h3>Kapasitas</h3>
-                <p id="capacity">30 orang</p>
-              </div>
-              <div class="detail-item" style="margin-top: 20px">
-                <h3>Lokasi</h3>
-                <p id="location">Lantai 2, Gedung A</p>
-              </div>
+            <div class="info-group">
+              <h3>Informasi Ruangan</h3>
+              <p id="roomName">Ruang Komersial AKK</p>
+              <small style="color: #64748b" id="roomLoc"
+                >Lantai 2, Gedung A</small
+              >
             </div>
           </div>
 
-          <div class="detail-row">
-            <div>
-              <div class="detail-item">
-                <h3>Tanggal</h3>
-                <p id="bookingDate">18 Jan 2026</p>
-              </div>
-              <div class="detail-item" style="margin-top: 20px">
-                <h3>Jam</h3>
-                <p id="bookingTime">10:00 - 12:00</p>
-              </div>
+          <div class="info-grid">
+            <div class="info-group">
+              <h3>Jadwal Penggunaan</h3>
+              <p id="bookingDate">18 Januari 2026</p>
+              <p id="bookingTime" style="color: var(--primary)">
+                10:00 - 12:00 WIB
+              </p>
             </div>
-            <div>
-              <div class="detail-item">
-                <h3>Subjek</h3>
-                <p id="subject">Training Komersial AKK</p>
-              </div>
-              <div class="detail-item" style="margin-top: 20px">
-                <h3>Status</h3>
-                <p>
-                  <span class="badge badge-pending" id="status">Pending</span>
-                </p>
-              </div>
+            <div class="info-group">
+              <h3>Subjek / Agenda</h3>
+              <p id="subject">Training Komersial AKK Tahap 1</p>
             </div>
           </div>
 
           <div class="divider"></div>
 
-          <div class="notes-section">
-            <h3>Catatan dari User</h3>
-            <div class="notes-content" id="notes">
-              Acara training rutin untuk divisi komersial. Memerlukan proyektor
-              dan whiteboard.
+          <div class="info-group">
+            <h3>Catatan Tambahan User</h3>
+            <div class="notes-box" id="userNotes">
+              "Acara training rutin untuk divisi komersial. Memerlukan proyektor
+              dan whiteboard dalam keadaan siap pakai."
             </div>
           </div>
+        </div>
 
-          <div class="approval-section" id="approvalSection">
-            <h3>Keputusan Approval</h3>
-            <div style="margin-bottom: 15px">
-              <label
-                style="
-                  display: block;
-                  margin-bottom: 10px;
-                  color: #2c3e50;
-                  font-weight: 600;
-                "
-                >Catatan (Opsional)</label
-              >
-              <textarea
-                id="approvalNotes"
-                placeholder="Tambahkan catatan untuk user..."
-              ></textarea>
-            </div>
-            <div class="button-group">
-              <button class="btn btn-success" onclick="approveBooking()">
-                Setujui Booking
-              </button>
-              <button class="btn btn-danger" onclick="rejectBooking()">
-                Tolak Booking
-              </button>
-              <a href="admin-bookings.html" class="btn btn-secondary"
-                >Kembali</a
-              >
-            </div>
+        <div class="approval-panel" id="approvalPanel">
+          <h3>Keputusan Admin</h3>
+          <textarea
+            id="adminComment"
+            placeholder="Berikan alasan jika ditolak, atau instruksi tambahan jika disetujui..."
+          ></textarea>
+
+          <div class="btn-group">
+            <a href="admin_booking.html" class="btn btn-back">Kembali</a>
+            <button class="btn btn-reject" onclick="handleAction('reject')">
+              Tolak Booking
+            </button>
+            <button class="btn btn-approve" onclick="handleAction('approve')">
+              Setujui Booking
+            </button>
           </div>
         </div>
       </div>
     </div>
 
     <script>
-      function initPage() {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!user || user.role !== "admin") {
-          window.location.href = "index.html";
-        }
-
-        const bookings = {
-          1: {
-            userName: "John Doe",
-            userEmail: "user@example.com",
-            phone: "+62-812-345-6789",
-            roomName: "Ruang Komersial AKK",
-            capacity: "30 orang",
-            location: "Lantai 2, Gedung A",
-            bookingDate: "18 Jan 2026",
-            bookingTime: "10:00 - 12:00",
-            subject: "Training Komersial AKK",
-            status: "Pending",
-            notes:
-              "Acara training rutin untuk divisi komersial. Memerlukan proyektor dan whiteboard.",
-          },
-          2: {
-            userName: "Jane Smith",
-            userEmail: "jane@example.com",
-            phone: "+62-813-246-8024",
-            roomName: "Ruang Excellence",
-            capacity: "25 orang",
-            location: "Lantai 3, Gedung B",
-            bookingDate: "19 Jan 2026",
-            bookingTime: "13:00 - 15:00",
-            subject: "Workshop Excellence",
-            status: "Pending",
-            notes:
-              "Workshop tentang excellence dan continuous improvement. Peserta akan dibagi menjadi 2 grup.",
-          },
-        };
-
+      // Mock Data Simulasikan data dari localStorage
+      function loadData() {
         const bookingId = localStorage.getItem("adminBookingDetail") || "1";
-        const booking = bookings[bookingId];
+        // Di real app, Anda akan melakukan fetch ke API atau Filter Array Data
+        console.log("Loading ID: " + bookingId);
+      }
 
-        if (booking) {
-          document.getElementById("userName").textContent = booking.userName;
-          document.getElementById("userEmail").textContent = booking.userEmail;
-          document.getElementById("phone").textContent = booking.phone;
-          document.getElementById("roomName").textContent = booking.roomName;
-          document.getElementById("capacity").textContent = booking.capacity;
-          document.getElementById("location").textContent = booking.location;
-          document.getElementById("bookingDate").textContent =
-            booking.bookingDate;
-          document.getElementById("bookingTime").textContent =
-            booking.bookingTime;
-          document.getElementById("subject").textContent = booking.subject;
-          document.getElementById("notes").textContent = booking.notes;
+      function handleAction(type) {
+        const comment = document.getElementById("adminComment").value;
 
-          if (booking.status !== "Pending") {
-            document.getElementById("approvalSection").style.display = "none";
+        if (type === "approve") {
+          if (confirm("Setujui pengajuan ruangan ini?")) {
+            alert("Berhasil: Booking telah DISETUJUI.");
+            window.location.href = "admin_booking.html";
+          }
+        } else {
+          if (!comment) {
+            alert("Mohon berikan alasan penolakan pada kolom catatan.");
+            return;
+          }
+          if (confirm("Tolak pengajuan ruangan ini?")) {
+            alert("Berhasil: Booking telah DITOLAK.");
+            window.location.href = "admin_booking.html";
           }
         }
       }
 
-      function approveBooking() {
-        const notes = document.getElementById("approvalNotes").value;
-        alert("Booking telah disetujui!");
-        window.location.href = "admin-bookings.html";
-      }
-
-      function rejectBooking() {
-        const notes = document.getElementById("approvalNotes").value;
-        if (confirm("Yakin ingin menolak booking ini?")) {
-          alert("Booking telah ditolak!");
-          window.location.href = "admin-bookings.html";
-        }
-      }
-
-      initPage();
+      window.onload = loadData;
     </script>
   </body>
 </html>
