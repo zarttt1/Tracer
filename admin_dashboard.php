@@ -1,14 +1,15 @@
 <?php
-include 'koneksi.php';
 session_start();
 
-// 1. Proteksi Halaman
-if (!isset($_SESSION['admin_logged_in'])) {
+// 1. Proteksi Halaman: Cek apakah sudah login DAN pastikan role-nya adalah 'admin'
+if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
+    // Jika bukan admin (atau belum login), lempar ke halaman login utama
     header("Location: login_admin.php");
-    exit();
+    exit;
 }
 
-// 2. Ambil Data Statistik
+// 2. Sertakan koneksi setelah proteksi berhasil
+include 'koneksi.php';
 $count_pending = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM bookings WHERE status = 'pending'"))['total'];
 $count_approved = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM bookings WHERE status = 'approved'"))['total'];
 $count_rooms = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM rooms"))['total'];
