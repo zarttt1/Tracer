@@ -65,11 +65,6 @@ if (!$data) {
         /* Box untuk catatan user */
         .notes-box { background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary); margin-top: 10px; font-size: 14px; color: #475569; }
         
-        /* Box untuk balasan admin - Dibuat lebih mencolok */
-        .admin-reply { background: #fffbeb; padding: 20px; border-radius: 12px; border: 1px solid #fde68a; border-left: 4px solid #f59e0b; margin-top: 25px; }
-        .admin-reply label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #92400e; margin-bottom: 8px; }
-        .admin-reply p { font-size: 15px; color: #78350f; font-weight: 500; }
-
         .badge { padding: 6px 16px; border-radius: 30px; font-size: 12px; font-weight: 800; text-transform: uppercase; }
         .badge-approved { background: #dcfce7; color: #15803d; }
         .badge-pending { background: #fef9c3; color: #a16207; }
@@ -130,13 +125,6 @@ if (!$data) {
                         <?= !empty($data['catatan']) ? nl2br(htmlspecialchars($data['catatan'])) : '<em>Tidak ada catatan tambahan.</em>' ?>
                     </div>
                 </div>
-
-                <?php if (!empty($data['admin_comment'])) : ?>
-                <div class="admin-reply">
-                    <label>Balasan Admin</label>
-                    <p><?= nl2br(htmlspecialchars($data['admin_comment'])) ?></p>
-                </div>
-                <?php endif; ?>
 
                 <div style="margin-top: 30px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
                     <a href="jadwal.php" class="btn-back">← Kembali ke Jadwal</a>

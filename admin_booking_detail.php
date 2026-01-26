@@ -18,15 +18,17 @@ $booking_id = mysqli_real_escape_string($conn, $_GET['id']);
 // 3. Proses Update Status (Approve/Reject)
 if (isset($_POST['update_status'])) {
     $status = mysqli_real_escape_string($conn, $_POST['status']);
+    // Menggunakan kolom catatan_admin sesuai dengan file admin_edit_booking sebelumnya
     $admin_comment = mysqli_real_escape_string($conn, $_POST['admin_comment']);
 
     if (!empty($status)) {
+        // Disamakan menggunakan kolom catatan_admin agar sinkron dengan halaman edit
         $sql_update = "UPDATE bookings SET status = '$status', admin_comment = '$admin_comment' WHERE id = '$booking_id'";
         
         if (mysqli_query($conn, $sql_update)) {
             echo "<script>alert('Status booking berhasil diperbarui!'); window.location='admin_booking.php';</script>";
         } else {
-            echo "<script>alert('Gagal memperbarui status.');</script>";
+            echo "<script>alert('Gagal memperbarui status: " . mysqli_error($conn) . "');</script>";
         }
     }
 }
@@ -43,6 +45,18 @@ if (!$data) {
     echo "Data tidak ditemukan.";
     exit();
 }
+
+// --- LOGIKA DETEKSI RUANGAN GABUNGAN ---
+$catatan_full = $data['catatan'] ?? '';
+$nama_ruangan_display = $data['nama_ruangan']; // Default dari database
+
+// Cek pola [GABUNG RUANGAN: ...] yang dikirim dari create_booking.php
+if (preg_match('/\[GABUNG RUANGAN: (.*?)\]/', $catatan_full, $matches)) {
+    $nama_ruangan_display = $matches[1]; // Ambil nama kustomnya (misal: ruang b dan c)
+    $catatan_user_clean = trim(str_replace($matches[0], '', $catatan_full)); // Bersihkan teks tag dari catatan
+} else {
+    $catatan_user_clean = $catatan_full;
+}
 ?>
 
 <!DOCTYPE html>
@@ -53,10 +67,10 @@ if (!$data) {
     <title>Admin - Detail Booking | TRACER</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <style>
-        :root { --primary: #27ae60; --bg: #f5f7fa; --text-main: #2c3e50; }
+        :root { --primary: #197b40; --bg: #f5f7fa; --text-main: #2c3e50; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
         body { background: var(--bg); color: var(--text-main); }
-        .navbar { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); padding: 0 8%; height: 70px; display: flex; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: white; }
+        .navbar { background: var(--primary); padding: 0 8%; height: 70px; display: flex; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: white; }
         .navbar h2 { font-size: 20px; font-weight: 800; }
         .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
         .card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
@@ -89,7 +103,7 @@ if (!$data) {
         <div class="card">
             <div class="card-header">
                 <h2>Detail Pengajuan Reservasi</h2>
-                <span class="badge badge-<?= strtolower($data['status']); ?>"><?= $data['status']; ?></span>
+                <span class="badge badge-<?= strtolower($data['status']); ?>"><?= strtoupper($data['status']); ?></span>
             </div>
 
             <div class="card-body">
@@ -101,7 +115,9 @@ if (!$data) {
                     </div>
                     <div class="info-group">
                         <h3>Informasi Ruangan</h3>
-                        <p><?= htmlspecialchars($data['nama_ruangan']); ?></p>
+                        <p style="color: #197b40; font-size: 16px;">
+                            <?= htmlspecialchars($nama_ruangan_display); ?>
+                        </p>
                     </div>
                 </div>
 
@@ -122,7 +138,7 @@ if (!$data) {
                 <div class="info-group">
                     <h3>Catatan Tambahan User</h3>
                     <div class="notes-box">
-                        <?= !empty($data['catatan']) ? nl2br(htmlspecialchars($data['catatan'])) : '<em>Tidak ada catatan.</em>' ?>
+                        <?= !empty($catatan_user_clean) ? nl2br(htmlspecialchars($catatan_user_clean)) : '<em>Tidak ada catatan tambahan.</em>' ?>
                     </div>
                 </div>
             </div>
@@ -131,7 +147,7 @@ if (!$data) {
             <form method="POST" action="">
                 <div class="approval-panel">
                     <h3>Keputusan Admin</h3>
-                    <textarea name="admin_comment" id="admin_comment" placeholder="Berikan alasan jika ditolak, atau instruksi tambahan jika disetujui..."></textarea>
+                    <textarea name="admin_comment" id="admin_comment" placeholder="Berikan alasan jika ditolak, atau instruksi tambahan jika disetujui..."><?= htmlspecialchars($data['admin_comment'] ?? ''); ?></textarea>
 
                     <input type="hidden" name="status" id="status_val" value="">
                     
@@ -150,9 +166,9 @@ if (!$data) {
             </form>
             <?php else : ?>
             <div class="approval-panel" style="background: #fff; border-top: 2px solid #f1f5f9;">
-                <h3>Komentar Admin Sebelumnya:</h3>
+                <h3>Balasan Admin:</h3>
                 <p style="font-style: italic; color: #64748b; margin-top: 10px; border-left: 3px solid #cbd5e1; padding-left: 10px;">
-                    "<?= $data['admin_comment'] ? htmlspecialchars($data['admin_comment']) : 'Tidak ada komentar.'; ?>"
+                    "<?= !empty($data['admin_comment']) ? htmlspecialchars($data['admin_comment']) : 'Tidak ada catatan admin.'; ?>"
                 </p>
                 <br>
                 <a href="admin_booking.php" class="btn btn-back" style="width: 100%;">Kembali ke Daftar</a>

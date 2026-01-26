@@ -1,30 +1,28 @@
 <?php
-include 'koneksi.php';
+// 1. Pastikan session_start adalah baris paling pertama
 session_start();
+include 'koneksi.php';
 
-// 1. Proteksi Halaman Admin
-if (!isset($_SESSION['admin_logged_in'])) {
+// 2. Proteksi Halaman Admin
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header("Location: login_admin.php");
     exit();
 }
 
-// 2. Logika Filter Status
+// 3. Logika Filter Status
 $filter = isset($_GET['status']) ? $_GET['status'] : 'all';
 
-// 3. Query Ambil Data - PERBAIKAN: Gunakan kolom yang benar
+// 4. Query Ambil Data
 $query_base = "SELECT b.*, r.nama_ruangan 
                FROM bookings b 
                JOIN rooms r ON b.room_id = r.id";
 
 if ($filter !== 'all') {
-    // Sanitasi input filter untuk keamanan
     $filter_safe = mysqli_real_escape_string($conn, $filter);
     $query_base .= " WHERE b.status = '$filter_safe'";
 }
 
-// PERBAIKAN: Gunakan b.id atau b.tanggal jika b.created_at tidak ada di tabel Anda
 $query_base .= " ORDER BY b.id DESC"; 
-
 $result = mysqli_query($conn, $query_base);
 ?>
 
@@ -70,8 +68,12 @@ $result = mysqli_query($conn, $query_base);
         .badge-approved { background: #dcfce7; color: #15803d; }
         .badge-rejected { background: #fee2e2; color: #991b1b; }
 
-        .btn-detail { background: #f1f5f9; color: #475569; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; border: 1px solid #e2e8f0; transition: 0.2s; }
+        .btn-action { display: inline-block; padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; transition: 0.2s; border: 1px solid #e2e8f0; margin-right: 5px; }
+        .btn-detail { background: #f1f5f9; color: #475569; }
+        .btn-edit { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
+        
         .btn-detail:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-edit:hover { background: #ea580c; color: white; border-color: #ea580c; }
     </style>
 </head>
 <body>
@@ -85,7 +87,9 @@ $result = mysqli_query($conn, $query_base);
             </ul>
         </div>
         <div class="navbar-user">
-            <span style="margin-right: 15px; font-size: 14px; font-weight: 600;">Halo, <?php echo htmlspecialchars($_SESSION['admin_name']); ?></span>
+            <span style="margin-right: 15px; font-size: 14px; font-weight: 600;">
+                Halo, <?php echo isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_name']) : 'Admin'; ?>
+            </span>
             <a href="logout.php" class="logout-btn">Logout</a>
         </div>
     </div>
@@ -114,7 +118,7 @@ $result = mysqli_query($conn, $query_base);
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (mysqli_num_rows($result) > 0) : ?>
+                        <?php if ($result && mysqli_num_rows($result) > 0) : ?>
                             <?php while ($row = mysqli_fetch_assoc($result)) : ?>
                                 <tr>
                                     <td>
@@ -134,7 +138,8 @@ $result = mysqli_query($conn, $query_base);
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="admin_booking_detail.php?id=<?php echo $row['id']; ?>" class="btn-detail">Kelola</a>
+                                        <a href="admin_booking_detail.php?id=<?php echo $row['id']; ?>" class="btn-action btn-detail">Kelola</a>
+                                        <a href="admin_edit_booking.php?id=<?php echo $row['id']; ?>" class="btn-action btn-edit">Edit</a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
