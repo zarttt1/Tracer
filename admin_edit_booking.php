@@ -98,7 +98,7 @@ if (isset($_POST['update'])) {
         </div>
         <div class="form-group">
             <label>Balasan Admin (Catatan)</label>
-            <textarea name="admin_comment" rows="3"><?= htmlspecialchars($data['admin_comment']) ?></textarea>
+            <textarea name="admin_comment" rows="3"><?= htmlspecialchars($data['admin_comment']?? '') ?></textarea>
         </div>
         <button type="submit" name="update" class="btn-save">Simpan Perubahan</button>
         <a href="admin_booking.php" class="btn-back">← Batal</a>
