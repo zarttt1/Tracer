@@ -98,7 +98,7 @@ $months = [
         <div class="nav-links">
             <a href="user1_dashboard.php" class="active">Dashboard</a>
             <a href="jadwal_user1.php">Jadwal</a>
-            <span>👤 <?= htmlspecialchars($_SESSION['admin_name']); ?></span>
+            <span>👤 <?= htmlspecialchars($_SESSION['nama_admin'] ?? 'User'); ?></span>
             <a href="logout.php" class="btn-logout">Logout</a>
         </div>
     </nav>
@@ -135,15 +135,26 @@ $months = [
                 </div>
                 <div class="room-list">
                     <?php
+                    // Mengambil status ruangan dan mengecek booking yang approved
                     $rooms = mysqli_query($conn, "SELECT * FROM rooms ORDER BY nama_ruangan ASC");
                     while($r = mysqli_fetch_assoc($rooms)):
                         $rid = $r['id'];
+                        
+                        // Cek apakah ada booking yang sudah disetujui (Approved) pada tanggal & ruangan ini
                         $book = mysqli_query($conn, "SELECT id FROM bookings WHERE room_id='$rid' AND tanggal='$selected_full_date' AND status='approved'");
                         $is_booked = mysqli_num_rows($book) > 0;
                         
-                        $status = "Tersedia"; $class = "available";
-                        if($r['status_aktif'] == 0) { $status = "Maintenance"; $class = "maintenance"; }
-                        elseif($is_booked) { $status = "Terisi"; $class = "booked"; }
+                        // Menentukan label dan class CSS berdasarkan prioritas: Maintenance > Booked > Available
+                        if($r['status_aktif'] == 0) { 
+                            $status = "Maintenance"; 
+                            $class = "maintenance"; 
+                        } elseif($is_booked) { 
+                            $status = "Terisi"; 
+                            $class = "booked"; 
+                        } else {
+                            $status = "Tersedia"; 
+                            $class = "available";
+                        }
                     ?>
                     <div class="room-card">
                         <div>

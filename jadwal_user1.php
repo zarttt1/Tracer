@@ -23,12 +23,15 @@ $display_date = date('d F Y', strtotime($tanggal_dipilih));
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
         body { background: var(--bg); color: #1e293b; }
         
-        /* Navbar Asli */
+        /* Navbar Disamakan dengan Dashboard */
         nav { background: var(--primary); padding: 0 5%; height: 65px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow); }
         .logo h1 { color: white; font-size: 20px; font-weight: 800; }
         .nav-links { display: flex; align-items: center; gap: 20px; }
-        .nav-links a { color: #e2e8f0; text-decoration: none; font-size: 14px; font-weight: 600; }
+        .nav-links a { color: #e2e8f0; text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.3s; }
         .nav-links a.active { color: white; border-bottom: 2px solid white; padding-bottom: 5px; }
+        .nav-links a:hover { color: white; }
+        /* Style Nama User (Kapsul) sesuai Dashboard */
+        .nav-links span { color: white; font-size: 13px; background: rgba(0,0,0,0.1); padding: 5px 12px; border-radius: 20px; }
         .btn-logout { background: #ef4444; color: white !important; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 700; }
 
         /* Hero Section */
@@ -41,10 +44,8 @@ $display_date = date('d F Y', strtotime($tanggal_dipilih));
         th { text-align: left; padding: 15px; color: #64748b; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
         td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
 
-        /* Logika Penanda Update Visual */
         .row-updated { border-left: 5px solid #f59e0b !important; background-color: #fffbeb; }
         .badge-update { background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; margin-left: 8px; }
-
         .badge-status { background: #dcfce7; color: #166534; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 11px; }
         .btn-view { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .btn-view:hover { background: var(--primary); color: white; }
@@ -67,6 +68,7 @@ $display_date = date('d F Y', strtotime($tanggal_dipilih));
         <div class="nav-links">
             <a href="user1_dashboard.php">Dashboard</a>
             <a href="jadwal_user1.php" class="active">Jadwal</a>
+            <span>👤 <?= htmlspecialchars($_SESSION['nama_admin'] ?? 'User'); ?></span>
             <a href="logout.php" class="btn-logout">Logout</a>
         </div>
     </nav>
@@ -109,7 +111,6 @@ $display_date = date('d F Y', strtotime($tanggal_dipilih));
                         while($row = mysqli_fetch_assoc($res)): 
                             $is_recent = (time() - strtotime($row['updated_at'])) < 86400;
 
-                            // --- LOGIKA RUANGAN GABUNGAN DI TABEL ---
                             $display_nama_ruangan = $row['nama_ruangan'];
                             if (preg_match('/\[GABUNG RUANGAN: (.*?)\]/', $row['catatan'], $matches)) {
                                 $display_nama_ruangan = $matches[1];
@@ -194,21 +195,18 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function openDetail(data, id) {
-    // --- LOGIKA PARSING GABUNG RUANGAN ---
     let catatanRaw = data.catatan || '';
     let displayRuangan = data.nama_ruangan;
     let catatanClean = catatanRaw;
 
-    // Gunakan Regex untuk mencari pola [GABUNG RUANGAN: ...]
     const regex = /\[GABUNG RUANGAN: (.*?)\]/;
     const match = catatanRaw.match(regex);
 
     if (match) {
-        displayRuangan = match[1]; // Ambil nama ruangan gabungan
-        catatanClean = catatanRaw.replace(match[0], '').trim(); // Hapus tag dari catatan
+        displayRuangan = match[1]; 
+        catatanClean = catatanRaw.replace(match[0], '').trim(); 
     }
 
-    // Populasi Data Modal
     document.getElementById('det-nama_peminjam').innerText = data.nama_peminjam || '-';
     document.getElementById('det-subject').innerText = data.subject || '-';
     document.getElementById('det-ruangan').innerText = displayRuangan;
@@ -217,11 +215,9 @@ function openDetail(data, id) {
     document.getElementById('det-catatan').innerText = catatanClean || 'Tidak ada catatan.';
     document.getElementById('det-bu').innerText = data.bu || '-';
 
-    // Logika Balasan Admin
     const boxBalasan = document.getElementById('box-balasan');
     const teksBalasan = document.getElementById('det-balasan-teks');
     
-    // Pastikan menggunakan kolom catatan_admin sesuai database
     if (data.admin_comment && data.admin_comment.trim() !== "") {
         teksBalasan.innerText = data.admin_comment;
         boxBalasan.style.display = 'block';
@@ -229,7 +225,6 @@ function openDetail(data, id) {
         boxBalasan.style.display = 'none';
     }
 
-    // Update Visual (LocalStorage)
     const badge = document.getElementById('badge-' + id);
     const row = document.getElementById('row-' + id);
     if (badge) badge.style.display = 'none';

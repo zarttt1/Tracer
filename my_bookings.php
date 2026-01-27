@@ -135,8 +135,9 @@ if (isset($_GET['cancel_id'])) {
     <nav>
         <a href="index.php" class="logo"><h1>TRACER</h1></a>
         <div class="nav-links">
-            <a href="jadwal.php" class="<?= ($current_page == 'jadwal.php') ? 'active' : '' ?>">Jadwal</a>
-            <a href="my_bookings.php" class="<?= ($current_page == 'my_bookings.php') ? 'active' : '' ?>">My Booking</a>
+            <a href="index.php">Beranda</a>
+            <a href="jadwal.php">Jadwal</a>
+            <a href="my_bookings.php"class="active">My Booking</a>
             <a href="login_admin.php" class="btn-login-admin">Admin</a>
         </div>
     </nav>

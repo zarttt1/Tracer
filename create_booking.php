@@ -11,40 +11,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tanggal = mysqli_real_escape_string($conn, $_POST['tanggal']);
     $sesi_pilihan = mysqli_real_escape_string($conn, $_POST['sesi']); 
     $subject = mysqli_real_escape_string($conn, $_POST['subject']);
-    $layout = mysqli_real_escape_string($conn, $_POST['roomset']); 
+    $layout = mysqli_real_escape_string($conn, $_POST['layout']); 
     $meals = mysqli_real_escape_string($conn, $_POST['meals']);
     $catatan_user = mysqli_real_escape_string($conn, $_POST['notes']); 
 
-    // --- LOGIKA GABUNG RUANGAN ---
+    // 1. Penanganan khusus jika pilih "Gabung Ruangan"
     if ($room_id === 'custom') {
-        $detail_gabungan = mysqli_real_escape_string($conn, $_POST['custom_room_name']);
-        // Simpan info gabungan ke dalam catatan agar admin tahu
-        $catatan = "[GABUNG RUANGAN: $detail_gabungan] " . $catatan_user;
-        // Kita gunakan room_id 0 atau ID salah satu ruangan sebagai placeholder
-        $final_room_id = 1; // Sesuaikan dengan salah satu ID di tabel rooms (misal Ruang A)
-    } else {
-        $catatan = $catatan_user;
-        $final_room_id = $room_id;
+        $detail_gabung = mysqli_real_escape_string($conn, $_POST['custom_room_name']);
+        // Untuk sistem database, kita harus arahkan ke satu ID master (misal ID 99) 
+        // atau simpan di catatan. Mari kita asumsikan untuk sementara gabung ruangan 
+        // menggunakan ID tertentu atau validasi manual.
+        // SARAN: Buat satu record di tabel 'rooms' bernama 'Gabungan / Custom' dengan ID khusus.
+        $room_id = 9; // Contoh ID untuk 'Gabungan'
+        $catatan_user = "[Permintaan Gabung: $detail_gabung] " . $catatan_user;
     }
 
-    // --- FITUR CEK BENTROK ---
-    $check_bentrok = mysqli_query($conn, "SELECT * FROM bookings 
-                                          WHERE room_id = '$final_room_id' 
-                                          AND tanggal = '$tanggal' 
-                                          AND waktu = '$sesi_pilihan' 
-                                          AND status = 'approved'");
+    // 2. Logika Cek Bentrok
+    $room_info = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id, parent_components FROM rooms WHERE id = '$room_id'"));
+    $current_components = !empty($room_info['parent_components']) ? explode(',', $room_info['parent_components']) : [$room_id];
 
-    if (mysqli_num_rows($check_bentrok) > 0) {
-        echo "<script>alert('Maaf, ruangan sudah terisi pada tanggal dan sesi tersebut.'); window.history.back();</script>";
-    } else {
-        $sql = "INSERT INTO bookings (room_id, nama_peminjam, bu, subject, tanggal, layout, meals, catatan, status, waktu, updated_at) 
-                VALUES ('$final_room_id', '$nama', '$bu', '$subject', '$tanggal', '$layout', '$meals', '$catatan', 'pending', '$sesi_pilihan', NOW())";
+    $sql_existing = "SELECT b.room_id, r.parent_components 
+                     FROM bookings b 
+                     JOIN rooms r ON b.room_id = r.id 
+                     WHERE b.tanggal = '$tanggal' 
+                     AND b.waktu = '$sesi_pilihan' 
+                     AND b.status != 'rejected'";
 
-        if (mysqli_query($conn, $sql)) {
-            echo "<script>alert('Booking berhasil dikirim!'); window.location='my_bookings.php';</script>";
-        } else {
-            echo "<script>alert('Gagal Simpan: " . mysqli_error($conn) . "');</script>";
+    $res_existing = mysqli_query($conn, $sql_existing);
+    $is_bentrok = false;
+
+    while ($row = mysqli_fetch_assoc($res_existing)) {
+        $existing_components = !empty($row['parent_components']) ? explode(',', $row['parent_components']) : [$row['room_id']];
+        $intersect = array_intersect($current_components, $existing_components);
+        if (!empty($intersect)) {
+            $is_bentrok = true;
+            break;
         }
+    }
+
+    if ($is_bentrok) {
+        echo "<script>alert('MAAF! Ruangan ini sudah dipesan pada waktu tersebut.'); window.history.back();</script>";
+        exit();
+    }
+
+    // 3. PROSES INSERT (Tambahkan bagian ini)
+    $query_insert = "INSERT INTO bookings (room_id, nama_peminjam, bu, tanggal, waktu, subject, layout, meals, catatan, status) 
+                     VALUES ('$room_id', '$nama', '$bu', '$tanggal', '$sesi_pilihan', '$subject', '$layout', '$meals', '$catatan_user', 'pending')";
+
+    if (mysqli_query($conn, $query_insert)) {
+        echo "<script>alert('Reservasi Berhasil Dikirim! Silakan tunggu konfirmasi admin.'); window.location='my_bookings.php';</script>";
+    } else {
+        echo "Error: " . mysqli_error($conn);
     }
 }
 ?>
@@ -63,7 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         nav { background: var(--primary); padding: 0 8%; height: 65px; display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
         .logo { text-decoration: none; color: white; } .logo h1 { font-size: 22px; font-weight: 800; }
         .nav-links { display: flex; align-items: center; gap: 10px; }
-        .nav-links a { color: rgba(255, 255, 255, 0.7); text-decoration: none; padding: 8px 166px; border-radius: 8px; font-weight: 600; font-size: 14px; }
+        .nav-links a { 
+    color: rgba(255, 255, 255, 0.7); 
+    text-decoration: none; 
+    padding: 8px 15px; /* Padding yang lebih masuk akal */
+    border-radius: 8px; 
+    font-weight: 600; 
+    font-size: 14px; 
+}
         .header-section { background: var(--primary); color: white; padding: 40px 8% 80px 8%; }
         .container { padding: 0 8%; max-width: 900px; margin: -50px auto 40px auto; }
         .card { background: var(--white); border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); border: 1px solid var(--border); padding: 35px; }
@@ -80,14 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </style>
 </head>
 <body>
-    <nav>
-        <a href="index.php" class="logo"><h1>TRACER</h1></a>
-        <div class="nav-links">
-            <a href="jadwal.php">Jadwal</a>
-            <a href="my_bookings.php">My Booking</a>
-        </div>
-    </nav>
-
     <div class="header-section">
         <h1>Form Reservasi</h1>
         <p>Lengkapi detail untuk mengajukan penggunaan ruangan.</p>
@@ -129,7 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 echo "<option value='".$r['id']."'>".$r['nama_ruangan']."</option>";
                             }
                             ?>
-                            <option value="custom" style="font-weight: bold; color: var(--primary);">+ Gabung Ruangan (A, B, C)</option>
                         </select>
 
                         <div id="customRoomBox" class="custom-box">
@@ -155,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     <div class="form-group">
                         <label>Layout Ruangan</label>
-                        <select name="roomset" required>
+                        <select name="layout" required>
                             <option value="">-- Pilih Layout --</option>
                             <option value="U-Shape">U-Shape</option>
                             <option value="Classroom">Classroom</option>

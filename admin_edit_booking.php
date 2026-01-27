@@ -2,9 +2,10 @@
 session_start();
 include 'koneksi.php';
 
-if (!isset($_SESSION['admin_logged_in'])) {
+// 1. Proteksi Halaman: Cek apakah sudah login DAN pastikan role-nya adalah 'admin'
+if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
     header("Location: login_admin.php");
-    exit();
+    exit;
 }
 
 if (isset($_GET['id'])) {

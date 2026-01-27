@@ -3,19 +3,32 @@ session_start();
 
 // 1. Proteksi Halaman: Cek apakah sudah login DAN pastikan role-nya adalah 'admin'
 if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
-    // Jika bukan admin (atau belum login), lempar ke halaman login utama
     header("Location: login_admin.php");
     exit;
 }
 
-// 2. Sertakan koneksi setelah proteksi berhasil
 include 'koneksi.php';
-$count_pending = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM bookings WHERE status = 'pending'"))['total'];
-$count_approved = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM bookings WHERE status = 'approved'"))['total'];
-$count_rooms = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM rooms"))['total'];
+
+// Ambil data admin yang sedang login untuk menampilkan nama di Navbar
+$admin_id = $_SESSION['user_id'];
+$query_admin = mysqli_query($conn, "SELECT nama_admin FROM admins WHERE id = '$admin_id'");
+$data_admin = mysqli_fetch_assoc($query_admin);
 
 // Tanggal Hari Ini
 $today = date('Y-m-d');
+
+// --- PENGAMBILAN DATA STATISTIK ---
+// 1. Total Menunggu Approval
+$count_pending = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM bookings WHERE status = 'pending'"))['total'];
+
+// 2. Booking Hari Ini (Disetujui & Tanggal Hari Ini)
+$count_today_approved = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM bookings WHERE tanggal = '$today' AND status = 'approved'"))['total'];
+
+// 3. Ruangan Terpakai Hari Ini (Berapa banyak ruangan unik yang ada booking approved-nya hari ini)
+$count_rooms_used = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(DISTINCT room_id) as total FROM bookings WHERE tanggal = '$today' AND status = 'approved'"))['total'];
+
+// 4. Total Ruangan yang Ada di Database (Untuk perbandingan)
+$count_rooms_total = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM rooms"))['total'];
 ?>
 
 <!DOCTYPE html>
@@ -109,7 +122,7 @@ $today = date('Y-m-d');
         .stat-card h3 { color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
         .stat-number { font-size: 32px; font-weight: 800; }
         .pending .stat-number { color: var(--warning); }
-        .approved .stat-number { color: var(--primary); }
+        .today .stat-number { color: var(--primary); }
         .rooms .stat-number { color: var(--blue); }
 
         /* --- TABLES --- */
@@ -142,7 +155,7 @@ $today = date('Y-m-d');
             </ul>
         </div>
         <div class="navbar-user">
-            <span style="font-size: 13px;">👋 Halo, <strong><?php echo $_SESSION['admin_name']; ?></strong></span>
+            <span style="font-size: 13px;">👋 Halo, <strong><?php echo htmlspecialchars($data_admin['nama_admin']); ?></strong></span>
             <a href="logout.php" class="logout-btn">Logout</a>
         </div>
     </div>
@@ -167,16 +180,16 @@ $today = date('Y-m-d');
 
         <div class="stats">
             <div class="stat-card pending">
-                <h3>Menunggu Approval</h3>
+                <h3>Butuh Persetujuan</h3>
                 <div class="stat-number"><?php echo $count_pending; ?></div>
             </div>
-            <div class="stat-card approved">
-                <h3>Total Disetujui</h3>
-                <div class="stat-number"><?php echo $count_approved; ?></div>
+            <div class="stat-card today">
+                <h3>Booking Hari Ini</h3>
+                <div class="stat-number"><?php echo $count_today_approved; ?></div>
             </div>
             <div class="stat-card rooms">
-                <h3>Total Ruangan</h3>
-                <div class="stat-number"><?php echo $count_rooms; ?></div>
+                <h3>Ruangan Terpakai</h3>
+                <div class="stat-number"><?php echo $count_rooms_used; ?> <span style="font-size: 16px; color: #94a3b8;">/ <?php echo $count_rooms_total; ?></span></div>
             </div>
         </div>
 

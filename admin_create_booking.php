@@ -4,9 +4,9 @@ session_start();
 date_default_timezone_set('Asia/Jakarta');
 
 // Pastikan hanya admin yang bisa akses
-if (!isset($_SESSION['admin_logged_in'])) {
+if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
     header("Location: login_admin.php");
-    exit();
+    exit;
 }
 
 // --- LOGIKA PROSES SIMPAN DATA (VERSI ADMIN) ---
@@ -19,30 +19,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $subject = mysqli_real_escape_string($conn, $_POST['subject']);
     $layout = mysqli_real_escape_string($conn, $_POST['roomset']);
     $meals = mysqli_real_escape_string($conn, $_POST['meals']);
-    $catatan = mysqli_real_escape_string($conn, $_POST['notes']);
+    $catatan_user = mysqli_real_escape_string($conn, $_POST['notes']);
     
-    // Tambahkan catatan otomatis bahwa ini dibuat oleh admin
-    $admin_note = "Booking langsung oleh Admin: " . $_SESSION['admin_name'];
+    // Gunakan nama admin dari session, jika tidak ada pakai 'Admin'
+    $admin_name = isset($_SESSION['nama_admin']) ? $_SESSION['nama_admin'] : 'Admin';
+    $admin_note = "Booking langsung oleh Admin: " . $admin_name;
+    $final_note = $admin_note . ($catatan_user ? " | Catatan: " . $catatan_user : "");
 
-    // --- FITUR CEK BENTROK ---
-    $check_bentrok = mysqli_query($conn, "SELECT * FROM bookings 
-                                          WHERE room_id = '$room_id' 
-                                          AND tanggal = '$tanggal' 
-                                          AND waktu = '$sesi_pilihan' 
-                                          AND status = 'approved'");
+    // --- FITUR CEK BENTROK (Smart Logic) ---
+    // 1. Ambil info ruangan yang ingin dipesan sekarang
+    $room_info = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id, parent_components FROM rooms WHERE id = '$room_id'"));
+    $current_components = !empty($room_info['parent_components']) ? explode(',', $room_info['parent_components']) : [$room_id];
 
-    if (mysqli_num_rows($check_bentrok) > 0) {
-        echo "<script>alert('Gagal! Ruangan sudah terisi (Approved) pada tanggal dan sesi tersebut.'); window.history.back();</script>";
-    } else {
-        // INSERT dengan status 'approved' dan mengisi admin_comment
-        $sql = "INSERT INTO bookings (room_id, nama_peminjam, bu, subject, tanggal, layout, meals, catatan, status, waktu, admin_comment) 
-                VALUES ('$room_id', '$nama', '$bu', '$subject', '$tanggal', '$layout', '$meals', '$catatan', 'approved', '$sesi_pilihan', '$admin_note')";
+    // 2. Ambil semua booking yang sudah ada di tanggal & sesi tersebut (Kecuali yang di-Reject)
+    // Gunakan OR untuk mengecek sesi Full Day yang bentrok dengan Pagi/Siang
+    $sql_existing = "SELECT b.room_id, r.parent_components 
+                     FROM bookings b 
+                     JOIN rooms r ON b.room_id = r.id 
+                     WHERE b.tanggal = '$tanggal' 
+                     AND b.status != 'rejected'
+                     AND (b.waktu = '$sesi_pilihan' OR b.waktu = 'Full Day' OR '$sesi_pilihan' = 'Full Day')";
 
-        if (mysqli_query($conn, $sql)) {
-            echo "<script>alert('Booking Instan Berhasil Dibuat!'); window.location='admin_dashboard.php';</script>";
-        } else {
-            echo "<script>alert('Gagal Simpan: " . mysqli_error($conn) . "');</script>";
+    $res_existing = mysqli_query($conn, $sql_existing);
+    $is_bentrok = false;
+
+    while ($row = mysqli_fetch_assoc($res_existing)) {
+        $existing_components = !empty($row['parent_components']) ? explode(',', $row['parent_components']) : [$row['room_id']];
+        $intersect = array_intersect($current_components, $existing_components);
+        
+        if (!empty($intersect)) {
+            $is_bentrok = true;
+            break;
         }
+    }
+
+    if ($is_bentrok) {
+        echo "<script>alert('MAAF! Ruangan ini (atau bagian dari ruangan gabungan ini) sudah dipesan untuk sesi tersebut. Silakan pilih ruangan atau waktu lain.'); window.history.back();</script>";
+        exit();
+    }
+
+    // --- PROSES INSERT KE DATABASE ---
+    // Status langsung 'approved' karena ini dibuat oleh Admin
+    $query_insert = "INSERT INTO bookings (room_id, nama_peminjam, bu, tanggal, waktu, subject, roomset, meals, catatan, status) 
+                     VALUES ('$room_id', '$nama', '$bu', '$tanggal', '$sesi_pilihan', '$subject', '$layout', '$meals', '$final_note', 'approved')";
+
+    if (mysqli_query($conn, $query_insert)) {
+        echo "<script>alert('Booking berhasil dibuat!'); window.location='admin_booking.php';</script>";
+    } else {
+        echo "<script>alert('Gagal menyimpan data: " . mysqli_error($conn) . "');</script>";
     }
 }
 ?>
@@ -100,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <li><a href="admin_room.php">Fasilitas</a></li>
             </ul>
         </div>
-        <span style="font-size: 13px;">Admin: <strong><?= $_SESSION['admin_name'] ?></strong></span>
+        <span style="font-size: 13px;">Admin: <strong><?= isset($_SESSION['nama_admin']) ? $_SESSION['nama_admin'] : 'Administrator' ?></strong></span>
     </div>
 
     <div class="header-section">
@@ -132,11 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <option value="UJA">UJA</option>
                             <option value="NSA">NSA</option>
                             <option value="SKT">SKT</option>
-                            <option value="GGF USA">GGF USA</option>
-                            <option value="GGF JAPAN">GGF JAPAN</option>
-                            <option value="GGF Singapore">GGF Singapore</option>
                             <option value="ITN">ITN</option>
-                            <option value="BE">BE</option>
                         </select>
                     </div>
 
@@ -145,9 +165,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <select name="room_id" required>
                             <option value="">-- Pilih Ruangan --</option>
                             <?php
-                            $rooms = mysqli_query($conn, "SELECT * FROM rooms WHERE status_aktif = 1");
+                            $rooms = mysqli_query($conn, "SELECT * FROM rooms WHERE status_aktif = 1 ORDER BY parent_components DESC, nama_ruangan ASC");
                             while ($r = mysqli_fetch_assoc($rooms)) {
-                                echo "<option value='".$r['id']."'>".$r['nama_ruangan']."</option>";
+                                $label = $r['nama_ruangan'];
+                                if(!empty($r['parent_components'])) $label .= " (Gabungan)";
+                                echo "<option value='".$r['id']."'>".$label."</option>";
                             }
                             ?>
                         </select>
@@ -210,7 +232,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
     <script>
-        // Set minimal tanggal hari ini
         const today = new Date().toISOString().split("T")[0];
         document.getElementById("inputDate").setAttribute('min', today);
     </script>

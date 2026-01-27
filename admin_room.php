@@ -3,10 +3,28 @@ include 'koneksi.php';
 session_start();
 
 // 1. Proteksi Halaman Admin
-if (!isset($_SESSION['admin_logged_in'])) {
+if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
     header("Location: login_admin.php");
-    exit();
+    exit;
 }
+
+// 2. Logika Toggle Status (Maintenance/Aktif)
+if (isset($_GET['toggle_id'])) {
+    $id = mysqli_real_escape_string($conn, $_GET['toggle_id']);
+    // Ambil status sekarang
+    $check = mysqli_query($conn, "SELECT status_aktif FROM rooms WHERE id = '$id'");
+    if (mysqli_num_rows($check) > 0) {
+        $current = mysqli_fetch_assoc($check)['status_aktif'];
+        $new_status = ($current == 1) ? 0 : 1;
+        mysqli_query($conn, "UPDATE rooms SET status_aktif = '$new_status' WHERE id = '$id'");
+    }
+    header("Location: admin_room.php");
+    exit;
+}
+
+$admin_id = $_SESSION['user_id'];
+$query_admin = mysqli_query($conn, "SELECT nama_admin FROM admins WHERE id = '$admin_id'");
+$data_admin = mysqli_fetch_assoc($query_admin);
 ?>
 
 <!DOCTYPE html>
@@ -41,14 +59,23 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
         table { width: 100%; border-collapse: collapse; }
         th { background: #f8f9fa; padding: 15px 25px; text-align: left; font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; }
-        td { padding: 20px 25px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-
-        .badge { padding: 6px 14px; border-radius: 30px; font-size: 11px; font-weight: 800; }
-        .badge-active { background: #dcfce7; color: #15803d; }
-        .badge-inactive { background: #fee2e2; color: #991b1b; }
+        td { padding: 20px 25px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
         .btn-edit { background: #f1f5f9; color: #475569; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; border: 1px solid #e2e8f0; transition: 0.2s; }
         .btn-edit:hover { background: #e2e8f0; }
+
+        /* --- TOGGLE SWITCH UI (Tambahan Baru) --- */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        
+        .status-container { display: flex; align-items: center; gap: 10px; }
+        .status-text { font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .text-active { color: var(--primary); }
+        .text-maintenance { color: #e74c3c; }
     </style>
 </head>
 <body>
@@ -62,7 +89,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
             </ul>
         </div>
         <div class="navbar-user">
-            <span style="margin-right: 15px; font-size: 14px; font-weight: 600;">Halo, <?= $_SESSION['admin_name']; ?></span>
+            <span style="font-size: 13px;">👋 Halo, <strong><?php echo htmlspecialchars($data_admin['nama_admin']); ?></strong></span>
             <a href="logout.php" class="logout-btn">Logout</a>
         </div>
     </div>
@@ -78,7 +105,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
                     <thead>
                         <tr>
                             <th>Nama Ruangan</th>
-                            <th>Status</th>
+                            <th>Status Ketersediaan</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -87,14 +114,22 @@ if (!isset($_SESSION['admin_logged_in'])) {
                         $rooms = mysqli_query($conn, "SELECT * FROM rooms ORDER BY nama_ruangan ASC");
                         if(mysqli_num_rows($rooms) > 0) {
                             while($r = mysqli_fetch_assoc($rooms)) {
-                                // Logika penentuan label status
-                                // Asumsi kolom di DB adalah 'status_aktif' (1 untuk aktif, 0 untuk non-aktif)
-                                $status_label = ($r['status_aktif'] == 1) ? 'Aktif' : 'Non-Aktif';
-                                $status_class = ($r['status_aktif'] == 1) ? 'badge-active' : 'badge-inactive';
+                                $is_active = ($r['status_aktif'] == 1);
                         ?>
                         <tr>
                             <td><b><?= htmlspecialchars($r['nama_ruangan']) ?></b></td>
-                            <td><span class="badge <?= $status_class ?>"><?= $status_label ?></span></td>
+                            <td>
+                                <div class="status-container">
+                                    <label class="switch">
+                                        <input type="checkbox" <?= $is_active ? 'checked' : '' ?> 
+                                               onchange="window.location.href='admin_room.php?toggle_id=<?= $r['id'] ?>'">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span class="status-text <?= $is_active ? 'text-active' : 'text-maintenance' ?>">
+                                        <?= $is_active ? 'Aktif' : 'Maintenance' ?>
+                                    </span>
+                                </div>
+                            </td>
                             <td>
                                 <a href="admin_room_edit.php?id=<?= $r['id'] ?>" class="btn-edit">Edit</a>
                             </td>
@@ -102,7 +137,7 @@ if (!isset($_SESSION['admin_logged_in'])) {
                         <?php 
                             } 
                         } else {
-                            echo "<tr><td colspan='5' style='text-align:center; padding: 40px; color: #94a3b8;'>Belum ada data ruangan.</td></tr>";
+                            echo "<tr><td colspan='3' style='text-align:center; padding: 40px; color: #94a3b8;'>Belum ada data ruangan.</td></tr>";
                         }
                         ?>
                     </tbody>

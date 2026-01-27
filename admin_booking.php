@@ -4,26 +4,42 @@ session_start();
 include 'koneksi.php';
 
 // 2. Proteksi Halaman Admin
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
     header("Location: login_admin.php");
-    exit();
+    exit;
 }
 
-// 3. Logika Filter Status
+// 3. Logika Aksi Cepat (Approve/Reject)
+if (isset($_GET['action']) && isset($_GET['id'])) {
+    $id = mysqli_real_escape_string($conn, $_GET['id']);
+    $action = $_GET['action'];
+    $new_status = ($action === 'approve') ? 'approved' : (($action === 'reject') ? 'rejected' : '');
+
+    if ($new_status !== '') {
+        $update_query = "UPDATE bookings SET status = '$new_status' WHERE id = '$id'";
+        if (mysqli_query($conn, $update_query)) {
+            // Redirect kembali ke halaman yang sama untuk menghindari submit ulang
+            $current_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+            header("Location: admin_booking.php?status=$current_filter&msg=success");
+            exit;
+        }
+    }
+}
+
+$admin_id = $_SESSION['user_id']; 
+$query_admin = mysqli_query($conn, "SELECT nama_admin FROM admins WHERE id = '$admin_id'");
+$data_admin = mysqli_fetch_assoc($query_admin);
+
 $filter = isset($_GET['status']) ? $_GET['status'] : 'all';
 
-// 4. Query Ambil Data
-$query_base = "SELECT b.*, r.nama_ruangan 
-               FROM bookings b 
-               JOIN rooms r ON b.room_id = r.id";
-
+$query_str = "SELECT b.*, r.nama_ruangan FROM bookings b JOIN rooms r ON b.room_id = r.id";
 if ($filter !== 'all') {
     $filter_safe = mysqli_real_escape_string($conn, $filter);
-    $query_base .= " WHERE b.status = '$filter_safe'";
+    $query_str .= " WHERE b.status = '$filter_safe'";
 }
-
-$query_base .= " ORDER BY b.id DESC"; 
-$result = mysqli_query($conn, $query_base);
+// Sorting: Pending di atas, lalu berdasarkan ID terbaru
+$query_str .= " ORDER BY (b.status = 'pending') DESC, b.id DESC";
+$result = mysqli_query($conn, $query_str);
 ?>
 
 <!doctype html>
@@ -68,12 +84,23 @@ $result = mysqli_query($conn, $query_base);
         .badge-approved { background: #dcfce7; color: #15803d; }
         .badge-rejected { background: #fee2e2; color: #991b1b; }
 
-        .btn-action { display: inline-block; padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; transition: 0.2s; border: 1px solid #e2e8f0; margin-right: 5px; }
-        .btn-detail { background: #f1f5f9; color: #475569; }
-        .btn-edit { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
+        /* --- ACTIONS --- */
+        .btn-action { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; text-decoration: none; font-size: 14px; transition: 0.2s; border: 1px solid #e2e8f0; margin-right: 4px; }
         
-        .btn-detail:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .btn-edit:hover { background: #ea580c; color: white; border-color: #ea580c; }
+        .btn-quick-approve { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+        .btn-quick-approve:hover { background: #15803d; color: white; }
+        
+        .btn-quick-reject { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+        .btn-quick-reject:hover { background: #b91c1c; color: white; }
+
+        .btn-detail-icon { background: #f1f5f9; color: #475569; }
+        .btn-detail-icon:hover { background: #2c3e50; color: white; }
+
+        .btn-edit-icon { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
+        .btn-edit-icon:hover { background: #ea580c; color: white; }
+
+        /* Tooltip simple */
+        .btn-action { position: relative; }
     </style>
 </head>
 <body>
@@ -87,9 +114,7 @@ $result = mysqli_query($conn, $query_base);
             </ul>
         </div>
         <div class="navbar-user">
-            <span style="margin-right: 15px; font-size: 14px; font-weight: 600;">
-                Halo, <?php echo isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_name']) : 'Admin'; ?>
-            </span>
+            <span style="font-size: 13px;">👋 Halo, <strong><?php echo htmlspecialchars($data_admin['nama_admin']); ?></strong></span>
             <a href="logout.php" class="logout-btn">Logout</a>
         </div>
     </div>
@@ -114,12 +139,14 @@ $result = mysqli_query($conn, $query_base);
                             <th>Ruangan</th>
                             <th>Tanggal & Sesi</th>
                             <th>Status</th>
-                            <th>Aksi</th>
+                            <th>Aksi Cepat & Detail</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if ($result && mysqli_num_rows($result) > 0) : ?>
-                            <?php while ($row = mysqli_fetch_assoc($result)) : ?>
+                            <?php while ($row = mysqli_fetch_assoc($result)) : 
+                                $status_lower = strtolower($row['status']);
+                            ?>
                                 <tr>
                                     <td>
                                         <div style="font-weight: 700; color: #2c3e50;"><?php echo htmlspecialchars($row['nama_peminjam']); ?></div>
@@ -133,13 +160,27 @@ $result = mysqli_query($conn, $query_base);
                                         <div style="font-size: 12px; color: #7f8c8d;">Sesi: <?php echo htmlspecialchars($row['waktu']); ?></div>
                                     </td>
                                     <td>
-                                        <span class="badge badge-<?php echo strtolower($row['status']); ?>">
+                                        <span class="badge badge-<?php echo $status_lower; ?>">
                                             <?php echo $row['status']; ?>
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="admin_booking_detail.php?id=<?php echo $row['id']; ?>" class="btn-action btn-detail">Kelola</a>
-                                        <a href="admin_edit_booking.php?id=<?php echo $row['id']; ?>" class="btn-action btn-edit">Edit</a>
+                                        <div style="display: flex;">
+                                            <?php if ($status_lower === 'pending') : ?>
+                                                <a href="admin_booking.php?action=approve&id=<?php echo $row['id']; ?>&status=<?php echo $filter; ?>" 
+                                                   class="btn-action btn-quick-approve" title="Setujui Cepat">✔</a>
+                                                
+                                                <a href="admin_booking.php?action=reject&id=<?php echo $row['id']; ?>&status=<?php echo $filter; ?>" 
+                                                   class="btn-action btn-quick-reject" title="Tolak Cepat" 
+                                                   onclick="return confirm('Tolak reservasi ini?')">✖</a>
+                                            <?php endif; ?>
+
+                                            <a href="admin_booking_detail.php?id=<?php echo $row['id']; ?>" 
+                                               class="btn-action btn-detail-icon" title="Kelola / Detail">📄</a>
+                                            
+                                            <a href="admin_edit_booking.php?id=<?php echo $row['id']; ?>" 
+                                               class="btn-action btn-edit-icon" title="Edit Data">✏️</a>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

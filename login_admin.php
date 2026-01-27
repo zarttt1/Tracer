@@ -32,39 +32,26 @@ if (isset($_POST['login'])) {
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = $_POST['password'];
 
-    $query = "SELECT * FROM admins WHERE username = '$username'";
-    $result = mysqli_query($conn, $query);
-
-    if (mysqli_num_rows($result) === 1) {
-        $row = mysqli_fetch_assoc($result);
-        
+    $query = mysqli_query($conn, "SELECT * FROM admins WHERE username = '$username'");
+    if (mysqli_num_rows($query) > 0) {
+        $row = mysqli_fetch_assoc($query);
         if (password_verify($password, $row['password'])) {
-            // Bersihkan output buffer untuk mencegah error "Headers already sent"
-            ob_start(); 
-
+            // Set session yang seragam untuk semua file
             $_SESSION['logged_in'] = true;
             $_SESSION['user_id']   = $row['id'];
-            $_SESSION['admin_name'] = $row['nama_admin'];
-            $_SESSION['role']      = strtolower($row['role']); // Paksa jadi huruf kecil
+            $_SESSION['username']  = $row['username'];
+            $_SESSION['nama']      = $row['nama_admin'];
+            $_SESSION['role']      = $row['role'];
 
-            session_write_close(); // Pastikan sesi tersimpan
-
-            // Debugging sederhana: Jika redirect gagal, teks ini akan muncul
-            if ($_SESSION['role'] === 'admin') {
+            if ($row['role'] == 'admin') {
                 header("Location: admin_dashboard.php");
-                echo "<script>window.location.href='admin_dashboard.php';</script>"; // Backup redirect via JS
-                exit;
             } else {
                 header("Location: user1_dashboard.php");
-                echo "<script>window.location.href='user1_dashboard.php';</script>"; // Backup redirect via JS
-                exit;
             }
-        } else {
-            $error = "Password salah!";
+            exit;
         }
-    } else {
-        $error = "Username tidak ditemukan!";
     }
+    $error = "Username atau Password salah!";
 }
 ?>
 <!DOCTYPE html>
