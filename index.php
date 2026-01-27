@@ -20,6 +20,13 @@ $months = [
     '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
     '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
 ];
+
+// Pre-fetch semua booking yang approved pada tanggal terpilih untuk logika keterkaitan
+$approved_bookings = [];
+$check_all_approved = mysqli_query($conn, "SELECT room_id, subject, nama_peminjam FROM bookings WHERE tanggal = '$selected_full_date' AND status = 'approved'");
+while ($b = mysqli_fetch_assoc($check_all_approved)) {
+    $approved_bookings[$b['room_id']] = $b;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -188,6 +195,8 @@ $months = [
                 
                 <div class="room-list">
                     <?php
+                    // Pastikan ID ruangan sesuai dengan database Anda: 3(A), 4(B), 5(C)
+                    // Dan ID ruangan gabungan (misal 9 untuk A+B, 10 untuk B+C, 11 untuk All In)
                     $sql = "SELECT * FROM rooms ORDER BY nama_ruangan ASC"; 
                     $result = mysqli_query($conn, $sql);
                     
@@ -195,29 +204,52 @@ $months = [
                         $room_id = $row['id'];
                         $status_aktif = $row['status_aktif']; 
                         $nama_ruangan = $row['nama_ruangan'];
-                        $data_book = null; // Inisialisasi awal agar tidak error
+                        
+                        $data_book = null;
+                        $status_label = "Tersedia";
+                        $status_class = "available";
+                        $tooltip = "Siap digunakan.";
 
                         if ($status_aktif == 0) {
                             $status_label = "Maintenance"; 
                             $status_class = "maintenance";
                             $tooltip = "Sedang dalam perbaikan.";
                         } else {
-                            $q_check = "SELECT b.subject, b.nama_peminjam FROM bookings b 
-                                        WHERE b.room_id = '$room_id' 
-                                        AND b.tanggal = '$selected_full_date' 
-                                        AND b.status = 'approved' LIMIT 1";
-                            
-                            $res_check = mysqli_query($conn, $q_check);
-                            $data_book = mysqli_fetch_assoc($res_check);
+                            // LOGIKA KETERKAITAN RUANGAN
+                            $related_rooms = [];
+                            switch ($room_id) {
+                                case 3: // Ruang A
+                                    $related_rooms = [3, 9, 11]; // Dirinya, A+B, All In
+                                    break;
+                                case 4: // Ruang B
+                                    $related_rooms = [4, 9, 10, 11]; // Dirinya, A+B, B+C, All In
+                                    break;
+                                case 5: // Ruang C
+                                    $related_rooms = [5, 10, 11]; // Dirinya, B+C, All In
+                                    break;
+                                case 9: // Ruang A+B
+                                    $related_rooms = [9, 3, 4, 11]; // Dirinya, A, B, All In
+                                    break;
+                                case 10: // Ruang B+C
+                                    $related_rooms = [10, 4, 5, 11]; // Dirinya, B, C, All In
+                                    break;
+                                case 11: // Ruang All In (A+B+C)
+                                    $related_rooms = [11, 3, 4, 5, 9, 10]; // Semua terkait
+                                    break;
+                                default:
+                                    $related_rooms = [$room_id];
+                                    break;
+                            }
 
-                            if ($data_book) {
-                                $status_label = "Terisi"; 
-                                $status_class = "booked";
-                                $tooltip = "Acara: " . $data_book['subject'];
-                            } else {
-                                $status_label = "Tersedia"; 
-                                $status_class = "available";
-                                $tooltip = "Siap digunakan.";
+                            // Cek apakah ada booking pada salah satu ruangan terkait
+                            foreach ($related_rooms as $id_cek) {
+                                if (isset($approved_bookings[$id_cek])) {
+                                    $data_book = $approved_bookings[$id_cek];
+                                    $status_label = "Terisi";
+                                    $status_class = "booked";
+                                    $tooltip = ($id_cek != $room_id) ? "Terblokir oleh ruangan terkait" : "Acara: " . $data_book['subject'];
+                                    break; 
+                                }
                             }
                         }
                     ?>
