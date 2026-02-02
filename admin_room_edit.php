@@ -2,9 +2,10 @@
 include 'koneksi.php';
 session_start();
 
-if (!isset($_SESSION['admin_logged_in'])) {
+// 1. Proteksi Halaman Admin
+if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
     header("Location: login_admin.php");
-    exit();
+    exit;
 }
 
 // 1. Ambil data ruangan

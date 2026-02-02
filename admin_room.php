@@ -63,14 +63,6 @@ $data_admin = mysqli_fetch_assoc($query_admin);
 
         .btn-edit { background: #f1f5f9; color: #475569; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; border: 1px solid #e2e8f0; transition: 0.2s; }
         .btn-edit:hover { background: #e2e8f0; }
-
-        /* --- TOGGLE SWITCH UI (Tambahan Baru) --- */
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(20px); }
         
         .status-container { display: flex; align-items: center; gap: 10px; }
         .status-text { font-size: 12px; font-weight: 700; text-transform: uppercase; }
@@ -98,7 +90,6 @@ $data_admin = mysqli_fetch_assoc($query_admin);
         <div class="card">
             <div class="card-header">
                 <h3>🏢 Kelola Ruangan Training</h3>
-                <a href="tambah_room.php" class="btn-add">+ Tambah Ruang</a>
             </div>
             <div class="card-body">
                 <table>
